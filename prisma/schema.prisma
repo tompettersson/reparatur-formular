@@ -1,0 +1,148 @@
+// Prisma Schema für Reparatur-Formular kletterschuhe.de
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// NextAuth Models
+// ============================================
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?   // Für Credentials Provider
+  accounts      Account[]
+  sessions      Session[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
+}
+
+// ============================================
+// Order Models
+// ============================================
+
+model Order {
+  id          String      @id @default(cuid())
+  orderNumber Int         @unique @default(autoincrement())
+  status      OrderStatus @default(DRAFT)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Rechnungsadresse
+  salutation String
+  firstName  String
+  lastName   String
+  street     String
+  zip        String
+  city       String
+  phone      String
+  email      String
+
+  // Lieferadresse (optional, wenn abweichend)
+  deliverySame       Boolean @default(true)
+  deliverySalutation String?
+  deliveryFirstName  String?
+  deliveryLastName   String?
+  deliveryStreet     String?
+  deliveryZip        String?
+  deliveryCity       String?
+
+  // Zusätzliche Informationen
+  stationNotes String? // Poststation/Hinweise
+
+  // Einwilligungen
+  gdprAccepted Boolean
+  agbAccepted  Boolean
+  newsletter   Boolean @default(false)
+
+  // Positionen
+  items OrderItem[]
+
+  // Berechnete Gesamtsumme (Snapshot)
+  totalPrice Decimal? @db.Decimal(10, 2)
+}
+
+model OrderItem {
+  id      String @id @default(cuid())
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  // Schuh-Details
+  quantity     Int    @default(1)
+  manufacturer String
+  model        String
+  color        String?
+  size         String
+
+  // Reparatur-Optionen
+  sole           String     // z.B. "vibram_xs_grip_2", "original"
+  edgeRubber     EdgeRubber // YES, NO, DISCRETION
+  closure        Boolean    @default(false)
+  additionalWork String?    // Zusatzarbeiten (Freitext)
+  internalNotes  String?    // Interne Bemerkung
+
+  // Preis-Snapshot (KVA)
+  calculatedPrice Decimal @db.Decimal(10, 2)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum OrderStatus {
+  DRAFT
+  SUBMITTED
+}
+
+enum EdgeRubber {
+  YES
+  NO
+  DISCRETION
+}
