@@ -1,0 +1,111 @@
+// Preislogik für Kletterschuh-Reparaturen
+
+export type SoleType =
+  | 'vibram_xs_grip'
+  | 'vibram_xs_grip_2'
+  | 'vibram_xs_edge'
+  | 'stealth_c4'
+  | 'stealth_hf'
+  | 'boreal'
+  | 'original_la_sportiva'
+  | 'original_scarpa';
+
+export type EdgeRubberOption = 'YES' | 'NO' | 'DISCRETION';
+
+// Sohlen-Preise
+export const SOLE_PRICES: Record<SoleType, { price: number; thickness: string; label: string }> = {
+  vibram_xs_grip: { price: 32, thickness: '4mm', label: 'Vibram XS Grip' },
+  vibram_xs_grip_2: { price: 32, thickness: '4mm', label: 'Vibram XS Grip 2' },
+  vibram_xs_edge: { price: 32, thickness: '4mm', label: 'Vibram XS Edge' },
+  stealth_c4: { price: 32, thickness: '4mm', label: 'Stealth C4' },
+  stealth_hf: { price: 32, thickness: '4mm', label: 'Stealth HF' },
+  boreal: { price: 32, thickness: '4mm', label: 'Boreal' },
+  original_la_sportiva: { price: 41, thickness: 'variabel', label: 'Original La Sportiva' },
+  original_scarpa: { price: 41, thickness: 'variabel', label: 'Original Scarpa' },
+};
+
+// Zusatzleistungen
+export const ADDITIONAL_PRICES = {
+  edgeRubber: 19, // Randgummi
+  closure: 20, // Fast Lacing (La Sportiva)
+  additionalWork: 3, // Zusatzarbeiten (Desinfektion etc.)
+};
+
+// Versandkosten (nur zur Info-Anzeige)
+export const SHIPPING_COSTS = {
+  germany: { label: 7, return: 7 },
+  eu: { label: 15, return: 11 },
+  nonEu: { label: 15, return: 15 },
+};
+
+// Hersteller-Liste
+export const MANUFACTURERS = [
+  'La Sportiva',
+  'Scarpa',
+  'Five Ten',
+  'Boreal',
+  'Ocun',
+  'Red Chili',
+  'Tenaya',
+  'Evolv',
+  'Mad Rock',
+  'Butora',
+  'Unparallel',
+  'So iLL',
+  'Andere',
+] as const;
+
+export type Manufacturer = typeof MANUFACTURERS[number];
+
+// Schuhgrößen
+export const SHOE_SIZES = Array.from({ length: 27 }, (_, i) => (24 + i).toString());
+
+// Preisberechnung für eine Position
+export interface OrderItemInput {
+  quantity: number;
+  sole: SoleType;
+  edgeRubber: EdgeRubberOption;
+  closure: boolean;
+  hasAdditionalWork: boolean;
+}
+
+export function calculateItemPrice(item: OrderItemInput): number {
+  let price = 0;
+
+  // Grundpreis der Sohle
+  const soleInfo = SOLE_PRICES[item.sole];
+  if (soleInfo) {
+    price += soleInfo.price;
+  }
+
+  // Randgummi (nur wenn JA)
+  if (item.edgeRubber === 'YES') {
+    price += ADDITIONAL_PRICES.edgeRubber;
+  }
+
+  // Verschluss (Fast Lacing)
+  if (item.closure) {
+    price += ADDITIONAL_PRICES.closure;
+  }
+
+  // Zusatzarbeiten
+  if (item.hasAdditionalWork) {
+    price += ADDITIONAL_PRICES.additionalWork;
+  }
+
+  // Multipliziert mit Anzahl
+  return price * item.quantity;
+}
+
+// Gesamtpreis berechnen
+export function calculateTotalPrice(items: OrderItemInput[]): number {
+  return items.reduce((total, item) => total + calculateItemPrice(item), 0);
+}
+
+// Formatierung
+export function formatPrice(price: number): string {
+  return new Intl.NumberFormat('de-DE', {
+    style: 'currency',
+    currency: 'EUR',
+  }).format(price);
+}

@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* Adobe Fonts (ff-meta-web-pro) - must be at top */
+/* TODO: Replace with actual Adobe Fonts Kit ID */
+/* @import url("https://use.typekit.net/xxxxxxx.css"); */
+
 /* ============================================
    kletterschuhe.de Design System
    ============================================ */
@@ -84,9 +88,6 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-
-/* Adobe Fonts (ff-meta-web-pro) */
-@import url("https://use.typekit.net/xxxxxxx.css"); /* TODO: Adobe Fonts Kit ID eintragen */
 
 /* Fallback falls Adobe Fonts nicht verfügbar */
 @supports not (font-family: "ff-meta-web-pro") {
