@@ -93,6 +93,38 @@ NEXTAUTH_SECRET                     # JWT signing secret
 NEXTAUTH_URL                        # e.g., http://localhost:3000
 ```
 
+## Shopware 6 API Integration
+
+### ⚠️ KRITISCH: PRODUCTION SHOP - NUR LESEN!
+
+Die Shopware API-Credentials verbinden mit dem **Live-Production-Shop von kletterschuhe.de**.
+
+**NIEMALS:**
+- Produkte erstellen, ändern oder löschen
+- Bestellungen modifizieren
+- Kategorien ändern
+- Irgendwelche POST/PUT/PATCH/DELETE Requests
+
+**ERLAUBT:**
+- Produktdaten lesen (für Autocomplete/Vorschläge im Formular)
+- Hersteller-Liste abrufen
+- Kategorien lesen
+
+### API Credentials
+
+In `.env.local`:
+```
+SHOPWARE_API_URL=https://www.kletterschuhe.de/api
+SHOPWARE_ACCESS_KEY_ID=SWIASDVXTWJWVWLLEE9TQUTBQG
+SHOPWARE_SECRET_ACCESS_KEY=WTA2WDI0WjNOdmxkV2l4dGFyeFkzQnpiODR4ZzNhTGNCaTRPTnA
+```
+
+### Verwendungszweck
+
+- **Produktvorschläge**: Beim Eingeben von Hersteller/Modell im ShoesStep
+- **Autocomplete**: Schuhmodelle basierend auf Shopware-Katalog
+- **Validierung**: Prüfen ob eingegebene Modelle existieren
+
 ## Deployment
 
 Deployed on Vercel. Environment variables must be set in Vercel dashboard. After deployment, run seed script locally with production DATABASE_URL to create admin user.
