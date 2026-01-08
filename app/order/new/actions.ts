@@ -150,3 +150,81 @@ export async function getOrder(id: string) {
     return null;
   }
 }
+
+// Kundendaten für E-Mail-Autofill
+export type CustomerData = {
+  found: boolean;
+  firstName?: string;
+  lastName?: string;
+  salutation?: string;
+  street?: string;
+  zip?: string;
+  city?: string;
+  phone?: string;
+  deliverySame?: boolean;
+  deliverySalutation?: string;
+  deliveryFirstName?: string;
+  deliveryLastName?: string;
+  deliveryStreet?: string;
+  deliveryZip?: string;
+  deliveryCity?: string;
+};
+
+export async function findCustomerByEmail(email: string): Promise<CustomerData> {
+  try {
+    // Validate email format
+    if (!email || !email.includes('@')) {
+      return { found: false };
+    }
+
+    // Find most recent submitted order for this email
+    const order = await prisma.order.findFirst({
+      where: {
+        email: email.toLowerCase().trim(),
+        status: 'SUBMITTED', // Only look at submitted orders, not drafts
+      },
+      orderBy: { createdAt: 'desc' },
+      select: {
+        salutation: true,
+        firstName: true,
+        lastName: true,
+        street: true,
+        zip: true,
+        city: true,
+        phone: true,
+        deliverySame: true,
+        deliverySalutation: true,
+        deliveryFirstName: true,
+        deliveryLastName: true,
+        deliveryStreet: true,
+        deliveryZip: true,
+        deliveryCity: true,
+      },
+    });
+
+    if (!order) {
+      return { found: false };
+    }
+
+    return {
+      found: true,
+      salutation: order.salutation,
+      firstName: order.firstName,
+      lastName: order.lastName,
+      street: order.street,
+      zip: order.zip,
+      city: order.city,
+      phone: order.phone,
+      deliverySame: order.deliverySame,
+      deliverySalutation: order.deliverySalutation || undefined,
+      deliveryFirstName: order.deliveryFirstName || undefined,
+      deliveryLastName: order.deliveryLastName || undefined,
+      deliveryStreet: order.deliveryStreet || undefined,
+      deliveryZip: order.deliveryZip || undefined,
+      deliveryCity: order.deliveryCity || undefined,
+    };
+  } catch (error) {
+    console.error('Error finding customer:', error);
+    return { found: false };
+  }
+}

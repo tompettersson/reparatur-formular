@@ -4,6 +4,7 @@ interface Step {
   id: number;
   title: string;
   description: string;
+  icon?: React.ReactNode;
 }
 
 interface StepperProps {
@@ -11,81 +12,104 @@ interface StepperProps {
   currentStep: number;
 }
 
+// Icons for each step
+const StepIcons = {
+  customer: (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
+    </svg>
+  ),
+  shoes: (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2H2v2z" />
+      <path d="M2 16l2-9a2 2 0 0 1 2-2h3l2 4h6l2-4h3a2 2 0 0 1 2 2l2 9" />
+    </svg>
+  ),
+  summary: (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 11l3 3L22 4" />
+      <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+    </svg>
+  ),
+};
+
+const CheckIcon = () => (
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="3"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className="checkmark-icon"
+  >
+    <path d="M5 12l5 5L20 7" />
+  </svg>
+);
+
 export function Stepper({ steps, currentStep }: StepperProps) {
+  // Calculate progress percentage
+  const progressPercent = ((currentStep - 1) / (steps.length - 1)) * 100;
+
+  const getStepIcon = (stepId: number) => {
+    switch (stepId) {
+      case 1:
+        return StepIcons.customer;
+      case 2:
+        return StepIcons.shoes;
+      case 3:
+        return StepIcons.summary;
+      default:
+        return stepId;
+    }
+  };
+
   return (
-    <nav aria-label="Progress" className="mb-8">
-      <ol className="flex items-center justify-center">
-        {steps.map((step, index) => {
+    <div className="stepper-container">
+      <nav aria-label="Fortschritt" className="stepper">
+        {/* Progress Track */}
+        <div className="stepper-track" aria-hidden="true">
+          <div
+            className="stepper-track-progress"
+            style={{ width: `${progressPercent}%` }}
+          />
+        </div>
+
+        {steps.map((step) => {
           const isCompleted = currentStep > step.id;
           const isCurrent = currentStep === step.id;
           const isUpcoming = currentStep < step.id;
 
           return (
-            <li key={step.id} className="relative flex items-center">
-              {/* Connector Line */}
-              {index > 0 && (
-                <div
-                  className={`absolute right-full w-16 h-0.5 mr-2 transition-colors duration-300 ${
-                    isCompleted || isCurrent ? 'bg-[#ef6a27]' : 'bg-gray-300'
-                  }`}
-                />
-              )}
-
+            <div
+              key={step.id}
+              className={`stepper-item ${isCompleted ? 'completed' : ''} ${isCurrent ? 'active' : ''}`}
+            >
               {/* Step Circle */}
-              <div className="flex flex-col items-center">
-                <div
-                  className={`
-                    flex items-center justify-center w-10 h-10 rounded-full
-                    text-sm font-semibold transition-all duration-300
-                    ${isCompleted
-                      ? 'bg-[#ef6a27] text-white'
-                      : isCurrent
-                      ? 'bg-gradient-to-r from-[#efa335] to-[#ef6a27] text-white shadow-lg scale-110'
-                      : 'bg-gray-200 text-gray-500'
-                    }
-                  `}
-                >
-                  {isCompleted ? (
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                      <path
-                        fillRule="evenodd"
-                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  ) : (
-                    step.id
-                  )}
-                </div>
-
-                {/* Step Title */}
-                <div className="mt-2 text-center">
-                  <p
-                    className={`text-sm font-medium ${
-                      isCurrent ? 'text-[#ef6a27]' : isCompleted ? 'text-[#38362d]' : 'text-gray-400'
-                    }`}
-                  >
-                    {step.title}
-                  </p>
-                  <p className="text-xs text-gray-500 mt-0.5 max-w-[100px]">
-                    {step.description}
-                  </p>
-                </div>
+              <div
+                className="stepper-icon"
+                aria-current={isCurrent ? 'step' : undefined}
+              >
+                {isCompleted ? (
+                  <CheckIcon />
+                ) : (
+                  getStepIcon(step.id)
+                )}
               </div>
 
-              {/* Connector Line (right side) */}
-              {index < steps.length - 1 && (
-                <div
-                  className={`w-16 h-0.5 ml-2 transition-colors duration-300 ${
-                    isCompleted ? 'bg-[#ef6a27]' : 'bg-gray-300'
-                  }`}
-                />
-              )}
-            </li>
+              {/* Step Label */}
+              <div className="stepper-content">
+                <span className="stepper-title">{step.title}</span>
+                <span className="stepper-description">{step.description}</span>
+              </div>
+            </div>
           );
         })}
-      </ol>
-    </nav>
+      </nav>
+    </div>
   );
 }
 

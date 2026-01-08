@@ -1,13 +1,52 @@
 'use client';
 
+import { ReactNode } from 'react';
 import { UseFormRegister, FieldErrors, UseFormWatch, Control, useFieldArray } from 'react-hook-form';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Checkbox } from '@/components/ui/Checkbox';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { Tooltip } from '@/components/ui/Tooltip';
 import { ShoesFormData, OrderItemFormData } from '@/lib/validation';
 import { SOLE_PRICES, MANUFACTURERS, SHOE_SIZES, calculateItemPrice, formatPrice, SoleType } from '@/lib/pricing';
+import { TOOLTIPS } from '@/lib/tooltips';
+
+// Helper component to render tooltip content with simple formatting
+function TooltipContent({ title, content }: { title: string; content: string }) {
+  // Process content safely - split into segments and render as React elements
+  const processLine = (line: string, key: number): ReactNode => {
+    // Split by bold markers
+    const parts = line.split(/(\*\*.*?\*\*)/g);
+    return parts.map((part, i) => {
+      if (part.startsWith('**') && part.endsWith('**')) {
+        return <strong key={i} className="text-[#fb923c]">{part.slice(2, -2)}</strong>;
+      }
+      return part;
+    });
+  };
+
+  const lines = content.split('\n');
+
+  return (
+    <div className="space-y-1">
+      <strong className="block text-white mb-2">{title}</strong>
+      {lines.map((line, i) => {
+        if (!line.trim()) return <div key={i} className="h-1" />;
+        const isBullet = line.trim().startsWith('•');
+
+        return (
+          <p
+            key={i}
+            className={`text-white/95 text-[13px] leading-relaxed ${isBullet ? 'pl-2' : ''}`}
+          >
+            {processLine(line, i)}
+          </p>
+        );
+      })}
+    </div>
+  );
+}
 
 interface ShoesStepProps {
   register: UseFormRegister<ShoesFormData>;
@@ -178,38 +217,76 @@ export function ShoesStep({ register, errors, watch, control }: ShoesStepProps) 
               />
 
               {/* Sohle */}
-              <Select
-                label="Gummi / Bauteil"
-                options={soleOptions}
-                placeholder="Bitte wählen..."
-                error={errors.items?.[index]?.sole?.message}
-                required
-                {...register(`items.${index}.sole` as const)}
-              />
+              <div>
+                <div className="flex items-center gap-1.5 mb-2">
+                  <label className="text-sm font-semibold text-[#38362d]" style={{ fontFamily: 'var(--font-display)' }}>
+                    Gummi / Bauteil<span className="text-[#ef6a27] ml-0.5">*</span>
+                  </label>
+                  <Tooltip
+                    content={<TooltipContent title={TOOLTIPS.sole.title} content={TOOLTIPS.sole.content} />}
+                    position="top"
+                    trigger="click"
+                    maxWidth={320}
+                  />
+                </div>
+                <Select
+                  options={soleOptions}
+                  placeholder="Bitte wählen..."
+                  error={errors.items?.[index]?.sole?.message}
+                  {...register(`items.${index}.sole` as const)}
+                />
+              </div>
 
               {/* Randgummi */}
-              <Select
-                label="Randgummi"
-                options={edgeRubberOptions}
-                error={errors.items?.[index]?.edgeRubber?.message}
-                required
-                {...register(`items.${index}.edgeRubber` as const)}
-              />
+              <div>
+                <div className="flex items-center gap-1.5 mb-2">
+                  <label className="text-sm font-semibold text-[#38362d]" style={{ fontFamily: 'var(--font-display)' }}>
+                    Randgummi<span className="text-[#ef6a27] ml-0.5">*</span>
+                  </label>
+                  <Tooltip
+                    content={<TooltipContent title={TOOLTIPS.edgeRubber.title} content={TOOLTIPS.edgeRubber.content} />}
+                    position="top"
+                    trigger="click"
+                    maxWidth={300}
+                  />
+                </div>
+                <Select
+                  options={edgeRubberOptions}
+                  error={errors.items?.[index]?.edgeRubber?.message}
+                  {...register(`items.${index}.edgeRubber` as const)}
+                />
+              </div>
 
               {/* Verschluss */}
               <div className="flex items-end pb-2">
-                <Checkbox
-                  label="Verschluss reparieren (+20€)"
-                  {...register(`items.${index}.closure` as const)}
-                />
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    label="Verschluss reparieren (+20€)"
+                    {...register(`items.${index}.closure` as const)}
+                  />
+                  <Tooltip
+                    content={<TooltipContent title={TOOLTIPS.closure.title} content={TOOLTIPS.closure.content} />}
+                    position="top"
+                    trigger="click"
+                    maxWidth={300}
+                  />
+                </div>
               </div>
             </div>
 
             {/* Zusatzarbeiten */}
             <div className="mt-4">
-              <label className="block text-sm font-medium text-[#38362d] mb-1">
-                Zusatzarbeiten (optional, +3€)
-              </label>
+              <div className="flex items-center gap-1.5 mb-1">
+                <label className="text-sm font-semibold text-[#38362d]" style={{ fontFamily: 'var(--font-display)' }}>
+                  Zusatzarbeiten (optional, +3€)
+                </label>
+                <Tooltip
+                  content={<TooltipContent title={TOOLTIPS.additionalWork.title} content={TOOLTIPS.additionalWork.content} />}
+                  position="top"
+                  trigger="click"
+                  maxWidth={280}
+                />
+              </div>
               <textarea
                 className="w-full px-3 py-2 rounded-md border border-gray-300 focus:border-[#ef6a27] focus:ring-2 focus:ring-[#ef6a27]/20 focus:outline-none resize-none"
                 rows={2}
