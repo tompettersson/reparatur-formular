@@ -6,23 +6,126 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
   size?: 'sm' | 'md' | 'lg';
   loading?: boolean;
+  icon?: React.ReactNode;
+  iconPosition?: 'left' | 'right';
 }
 
+const LoadingSpinner = () => (
+  <svg
+    className="animate-spin h-5 w-5"
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+  >
+    <circle
+      className="opacity-25"
+      cx="12"
+      cy="12"
+      r="10"
+      stroke="currentColor"
+      strokeWidth="4"
+    />
+    <path
+      className="opacity-75"
+      fill="currentColor"
+      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+    />
+  </svg>
+);
+
+const ArrowRight = () => (
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className="transition-transform group-hover:translate-x-1"
+  >
+    <path d="M5 12h14M12 5l7 7-7 7" />
+  </svg>
+);
+
+const ArrowLeft = () => (
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className="transition-transform group-hover:-translate-x-1"
+  >
+    <path d="M19 12H5M12 19l-7-7 7-7" />
+  </svg>
+);
+
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className = '', variant = 'primary', size = 'md', loading, children, disabled, ...props }, ref) => {
-    const baseStyles = 'inline-flex items-center justify-center font-medium transition-all duration-200 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
+  (
+    {
+      className = '',
+      variant = 'primary',
+      size = 'md',
+      loading,
+      icon,
+      iconPosition = 'right',
+      children,
+      disabled,
+      ...props
+    },
+    ref
+  ) => {
+    const baseStyles = `
+      group relative inline-flex items-center justify-center gap-2
+      font-semibold rounded-[10px] border-none cursor-pointer
+      transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]
+      disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
+      focus:outline-none focus-visible:ring-4 focus-visible:ring-offset-2
+    `;
 
     const variants = {
-      primary: 'bg-gradient-to-r from-[#efa335] to-[#ef6a27] text-white hover:shadow-lg hover:scale-[1.02] focus:ring-[#ef6a27]',
-      secondary: 'bg-[#3ca1ac] text-white hover:bg-[#2d8a94] focus:ring-[#3ca1ac]',
-      outline: 'border-2 border-[#ef6a27] text-[#ef6a27] hover:bg-[#ef6a27] hover:text-white focus:ring-[#ef6a27]',
-      ghost: 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 focus:ring-gray-400',
+      primary: `
+        bg-gradient-to-br from-[#efa335] via-[#ef6a27] to-[#ea580c]
+        text-white
+        shadow-[0_4px_6px_-1px_rgba(0,0,0,0.07),0_2px_4px_-1px_rgba(0,0,0,0.04),0_4px_12px_rgba(239,106,39,0.25)]
+        hover:shadow-[0_10px_15px_-3px_rgba(0,0,0,0.08),0_4px_6px_-2px_rgba(0,0,0,0.04),0_8px_20px_rgba(239,106,39,0.3)]
+        hover:-translate-y-0.5
+        active:translate-y-0 active:shadow-[0_1px_3px_rgba(0,0,0,0.06),0_2px_8px_rgba(239,106,39,0.2)]
+        focus-visible:ring-[#ef6a27]/30
+      `,
+      secondary: `
+        bg-gradient-to-br from-[#5eead4] via-[#3ca1ac] to-[#0d9488]
+        text-white
+        shadow-[0_4px_6px_-1px_rgba(0,0,0,0.07),0_2px_4px_-1px_rgba(0,0,0,0.04)]
+        hover:shadow-[0_10px_15px_-3px_rgba(0,0,0,0.08),0_4px_6px_-2px_rgba(0,0,0,0.04)]
+        hover:-translate-y-0.5
+        active:translate-y-0
+        focus-visible:ring-[#3ca1ac]/30
+      `,
+      outline: `
+        bg-transparent
+        border-2 border-[#d6d3d1]
+        text-[#38362d]
+        hover:border-[#ef6a27] hover:text-[#ef6a27] hover:bg-[#fff7ed]
+        focus-visible:ring-[#ef6a27]/20
+      `,
+      ghost: `
+        bg-transparent
+        text-[#78716c]
+        hover:bg-[#f5f5f4] hover:text-[#38362d]
+        focus-visible:ring-[#78716c]/20
+      `,
     };
 
     const sizes = {
-      sm: 'px-3 py-1.5 text-sm',
-      md: 'px-4 py-2 text-base',
-      lg: 'px-6 py-3 text-lg',
+      sm: 'px-4 py-2 text-sm',
+      md: 'px-6 py-3 text-base',
+      lg: 'px-8 py-4 text-lg',
     };
 
     return (
@@ -32,16 +135,33 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         disabled={disabled || loading}
         {...props}
       >
-        {loading && (
-          <svg className="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-          </svg>
-        )}
-        {children}
+        {/* Gradient overlay for hover effect */}
+        <span
+          className="absolute inset-0 rounded-[10px] bg-gradient-to-b from-white/15 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+          aria-hidden="true"
+        />
+
+        {/* Content */}
+        <span className="relative flex items-center gap-2">
+          {loading ? (
+            <>
+              <LoadingSpinner />
+              <span>Wird geladen...</span>
+            </>
+          ) : (
+            <>
+              {icon && iconPosition === 'left' && icon}
+              {children}
+              {icon && iconPosition === 'right' && icon}
+            </>
+          )}
+        </span>
       </button>
     );
   }
 );
 
 Button.displayName = 'Button';
+
+// Export arrow icons for convenience
+export { ArrowRight, ArrowLeft };

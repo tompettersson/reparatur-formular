@@ -15,29 +15,84 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="w-full">
         {label && (
-          <label htmlFor={inputId} className="block text-sm font-medium text-[#38362d] mb-1">
+          <label
+            htmlFor={inputId}
+            className="block text-sm font-semibold text-[#38362d] mb-2 tracking-tight"
+            style={{ fontFamily: 'var(--font-display)' }}
+          >
             {label}
-            {props.required && <span className="text-red-500 ml-1">*</span>}
+            {props.required && (
+              <span className="text-[#ef6a27] ml-0.5">*</span>
+            )}
           </label>
         )}
-        <input
-          ref={ref}
-          id={inputId}
-          className={`
-            w-full px-3 py-2 rounded-md border transition-colors duration-200
-            bg-white text-[#38362d] placeholder-gray-400
-            border-gray-300 focus:border-[#ef6a27] focus:ring-2 focus:ring-[#ef6a27]/20 focus:outline-none
-            disabled:bg-gray-100 disabled:cursor-not-allowed
-            ${error ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : ''}
-            ${className}
-          `}
-          {...props}
-        />
+        <div className="relative">
+          <input
+            ref={ref}
+            id={inputId}
+            className={`
+              w-full px-4 py-3 rounded-[10px]
+              bg-white text-[#38362d] placeholder-[#a8a29e]
+              border-2 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]
+              ${error
+                ? 'border-[#ef4444] focus:border-[#ef4444] focus:ring-4 focus:ring-[#ef4444]/10'
+                : 'border-[#e7e5e4] hover:border-[#d6d3d1] focus:border-[#ef6a27] focus:ring-4 focus:ring-[#ef6a27]/10'
+              }
+              focus:outline-none
+              disabled:bg-[#f5f5f4] disabled:cursor-not-allowed disabled:opacity-60
+              ${className}
+            `}
+            {...props}
+          />
+          {/* Focus glow effect */}
+          <div
+            className={`
+              absolute inset-0 rounded-[10px] pointer-events-none
+              transition-opacity duration-300
+              ${error
+                ? 'shadow-[0_0_0_4px_rgba(239,68,68,0.1)]'
+                : 'shadow-[0_0_0_4px_rgba(239,106,39,0.1)]'
+              }
+              opacity-0 peer-focus:opacity-100
+            `}
+          />
+        </div>
         {hint && !error && (
-          <p className="mt-1 text-xs text-gray-500">{hint}</p>
+          <p className="mt-2 text-xs text-[#78716c] flex items-center gap-1">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="opacity-60"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 16v-4M12 8h.01" />
+            </svg>
+            {hint}
+          </p>
         )}
         {error && (
-          <p className="mt-1 text-xs text-red-500">{error}</p>
+          <p className="mt-2 text-xs text-[#ef4444] flex items-center gap-1 animate-fade-in">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 8v4M12 16h.01" />
+            </svg>
+            {error}
+          </p>
         )}
       </div>
     );
