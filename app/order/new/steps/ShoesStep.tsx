@@ -11,6 +11,7 @@ import { Tooltip } from '@/components/ui/Tooltip';
 import { ShoesFormData, OrderItemFormData } from '@/lib/validation';
 import { SOLE_PRICES, MANUFACTURERS, SHOE_SIZES, calculateItemPrice, formatPrice, SoleType } from '@/lib/pricing';
 import { TOOLTIPS } from '@/lib/tooltips';
+import { ProductSuggestions } from '@/components/ProductSuggestions';
 
 // Helper component to render tooltip content with simple formatting
 function TooltipContent({ title, content }: { title: string; content: string }) {
@@ -201,13 +202,20 @@ export function ShoesStep({ register, errors, watch, control }: ShoesStepProps) 
               />
 
               {/* Modell */}
-              <Input
-                label="Modell"
-                placeholder="z.B. Solution"
-                error={errors.items?.[index]?.model?.message}
-                required
-                {...register(`items.${index}.model` as const)}
-              />
+              <div>
+                <Input
+                  label="Modell"
+                  placeholder="z.B. Solution"
+                  error={errors.items?.[index]?.model?.message}
+                  required
+                  {...register(`items.${index}.model` as const)}
+                />
+                {/* Produktvorschläge aus dem Shop */}
+                <ProductSuggestions
+                  manufacturer={items?.[index]?.manufacturer || ''}
+                  modelQuery={items?.[index]?.model || ''}
+                />
+              </div>
 
               {/* Farbe */}
               <Input

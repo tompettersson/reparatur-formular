@@ -4,6 +4,8 @@ import { prisma } from '@/lib/prisma';
 import { orderSchema, OrderFormData } from '@/lib/validation';
 import { calculateItemPrice } from '@/lib/pricing';
 import { revalidatePath } from 'next/cache';
+import { searchProducts } from '@/lib/shopware';
+import type { ProductSuggestion } from '@/lib/shopware';
 import { redirect } from 'next/navigation';
 
 export type ActionResult = {
@@ -226,5 +228,32 @@ export async function findCustomerByEmail(email: string): Promise<CustomerData> 
   } catch (error) {
     console.error('Error finding customer:', error);
     return { found: false };
+  }
+}
+
+
+/**
+ * Suche nach Produkten im kletterschuhe.de Shop
+ * READ-ONLY - Nur für Produktvorschläge im Formular
+ *
+ * @param manufacturer - Hersteller (z.B. "La Sportiva")
+ * @param query - Suchbegriff (z.B. "Solution")
+ * @returns Array von Produktvorschlägen
+ */
+export async function searchShopwareProducts(
+  manufacturer: string,
+  query: string
+): Promise<ProductSuggestion[]> {
+  try {
+    // Mindestens 2 Zeichen für Suche
+    if (!query || query.length < 2) {
+      return [];
+    }
+
+    const suggestions = await searchProducts(manufacturer, query);
+    return suggestions;
+  } catch (error) {
+    console.error('Error searching Shopware products:', error);
+    return [];
   }
 }
