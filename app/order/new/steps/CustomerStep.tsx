@@ -128,7 +128,7 @@ export function CustomerStep({ register, errors, watch, setValue }: CustomerStep
 
         if (customerData.found) {
           // Fill form fields
-          if (customerData.salutation) setValue('salutation', customerData.salutation);
+          if (customerData.salutation) setValue('salutation', customerData.salutation as 'Herr' | 'Frau' | 'Divers');
           if (customerData.firstName) setValue('firstName', customerData.firstName);
           if (customerData.lastName) setValue('lastName', customerData.lastName);
           if (customerData.street) setValue('street', customerData.street);
@@ -141,7 +141,7 @@ export function CustomerStep({ register, errors, watch, setValue }: CustomerStep
             setValue('deliverySame', customerData.deliverySame);
           }
           if (!customerData.deliverySame) {
-            if (customerData.deliverySalutation) setValue('deliverySalutation', customerData.deliverySalutation);
+            if (customerData.deliverySalutation) setValue('deliverySalutation', customerData.deliverySalutation as 'Herr' | 'Frau' | 'Divers');
             if (customerData.deliveryFirstName) setValue('deliveryFirstName', customerData.deliveryFirstName);
             if (customerData.deliveryLastName) setValue('deliveryLastName', customerData.deliveryLastName);
             if (customerData.deliveryStreet) setValue('deliveryStreet', customerData.deliveryStreet);
