@@ -73,12 +73,6 @@ const ShieldIcon = () => (
   </svg>
 );
 
-const PlayIcon = () => (
-  <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
-    <polygon points="5 3 19 12 5 21 5 3" />
-  </svg>
-);
-
 // Check mark icon for autofill success
 const CheckCircleIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -181,17 +175,14 @@ export function CustomerStep({ register, errors, watch, setValue }: CustomerStep
         icon={<VideoIcon />}
         variant="elevated"
       >
-        <div className="relative aspect-video bg-gradient-to-br from-[#44403c] to-[#292524] rounded-[12px] overflow-hidden group cursor-pointer">
-          {/* Placeholder content */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-white/60">
-            <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center mb-3 transition-all duration-300 group-hover:bg-white/20 group-hover:scale-110">
-              <PlayIcon />
-            </div>
-            <p className="text-sm font-medium">Video: Ablauf der Reparatur</p>
-            <p className="text-xs mt-1 text-white/40">(Video-URL folgt)</p>
-          </div>
-          {/* Decorative gradient */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
+        <div className="relative aspect-video rounded-[12px] overflow-hidden">
+          <iframe
+            src="https://www.youtube-nocookie.com/embed/PwaIotj5Tqo?rel=0&modestbranding=1"
+            title="Optimale Kletterschuh Reparatur: Originalbauteile vs. Halbsohle"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            className="absolute inset-0 w-full h-full"
+          />
         </div>
       </Card>
 
