@@ -6,7 +6,15 @@ import { AdminHeader } from '../AdminHeader';
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   DRAFT: { label: 'Entwurf', color: 'bg-gray-100 text-gray-700' },
-  SUBMITTED: { label: 'Eingereicht', color: 'bg-green-100 text-green-700' },
+  SUBMITTED: { label: 'Eingereicht', color: 'bg-blue-100 text-blue-700' },
+  RECEIVED: { label: 'Eingetroffen', color: 'bg-indigo-100 text-indigo-700' },
+  INSPECTED: { label: 'Begutachtet', color: 'bg-purple-100 text-purple-700' },
+  REPAIRING: { label: 'In Reparatur', color: 'bg-yellow-100 text-yellow-800' },
+  READY: { label: 'Fertig', color: 'bg-green-100 text-green-700' },
+  SHIPPED: { label: 'Versendet', color: 'bg-teal-100 text-teal-700' },
+  COMPLETED: { label: 'Abgeschlossen', color: 'bg-green-600 text-white' },
+  CANCELLED: { label: 'Storniert', color: 'bg-red-100 text-red-700' },
+  ON_HOLD: { label: 'Rückfrage', color: 'bg-orange-100 text-orange-700' },
 };
 
 export default async function AdminOrdersPage() {

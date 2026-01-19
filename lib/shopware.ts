@@ -65,10 +65,10 @@ async function getAccessToken(): Promise<string> {
   }
 
   const data = await response.json();
-  cachedToken = data.access_token;
+  cachedToken = data.access_token as string;
   tokenExpiry = Date.now() + (data.expires_in * 1000);
 
-  return cachedToken;
+  return cachedToken as string;
 }
 
 /**

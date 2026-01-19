@@ -4,11 +4,8 @@ import Link from 'next/link';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { AdminHeader } from '../../AdminHeader';
-
-const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  DRAFT: { label: 'Entwurf', color: 'bg-gray-100 text-gray-700' },
-  SUBMITTED: { label: 'Eingereicht', color: 'bg-green-100 text-green-700' },
-};
+import { StatusChangeForm, STATUS_CONFIG } from './StatusChangeForm';
+import { OrderStatus } from '@/app/generated/prisma/client';
 
 const SOLE_NAMES: Record<string, string> = {
   vibram_xs_grip: 'Vibram XS Grip (4mm)',
@@ -35,7 +32,17 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
 
   const order = await prisma.order.findUnique({
     where: { id },
-    include: { items: true },
+    include: {
+      items: true,
+      statusChanges: {
+        orderBy: { changedAt: 'desc' },
+        take: 10,
+      },
+      history: {
+        orderBy: { changedAt: 'desc' },
+        take: 10,
+      },
+    },
   });
 
   if (!order) {
@@ -49,6 +56,18 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
     hour: '2-digit',
     minute: '2-digit',
   }).format(order.createdAt);
+
+  const formatHistoryDate = (date: Date) =>
+    new Intl.DateTimeFormat('de-DE', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(date);
+
+  // Check if order can be edited (not completed or cancelled)
+  const canEdit = !['COMPLETED', 'CANCELLED'].includes(order.status);
 
   return (
     <div className="min-h-screen bg-[#f3f3f3]">
@@ -67,21 +86,28 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
         </Link>
 
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div>
             <h1 className="text-2xl font-bold text-[#38362d]">
               Auftrag #{order.orderNumber}
             </h1>
             <p className="text-gray-500">{formattedDate}</p>
           </div>
-          <div className="flex items-center gap-4">
-            <span
-              className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${
-                STATUS_LABELS[order.status]?.color || 'bg-gray-100'
-              }`}
-            >
-              {STATUS_LABELS[order.status]?.label || order.status}
-            </span>
+          <div className="flex items-center gap-3">
+            <StatusChangeForm
+              orderId={order.id}
+              currentStatus={order.status as OrderStatus}
+            />
+            {canEdit && (
+              <Link href={`/admin/orders/${order.id}/edit`}>
+                <Button variant="secondary">
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                  Bearbeiten
+                </Button>
+              </Link>
+            )}
             <Link href={`/order/${order.id}/print`} target="_blank">
               <Button>
                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -135,7 +161,7 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
           {/* Items */}
           <Card title="Schuhe / Positionen" className="lg:col-span-2">
             <div className="space-y-4">
-              {order.items.map((item, index) => (
+              {order.items.map((item) => (
                 <div
                   key={item.id}
                   className="p-4 bg-gray-50 rounded-lg border border-gray-100"
@@ -205,6 +231,78 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
             </div>
           </Card>
         </div>
+
+        {/* Status History */}
+        {order.statusChanges.length > 0 && (
+          <Card title="Status-Verlauf" className="mt-6">
+            <div className="space-y-3">
+              {order.statusChanges.map((change) => {
+                const fromConfig = STATUS_CONFIG[change.fromStatus as OrderStatus];
+                const toConfig = STATUS_CONFIG[change.toStatus as OrderStatus];
+                return (
+                  <div key={change.id} className="flex items-start gap-3 pb-3 border-b border-gray-100 last:border-0 last:pb-0">
+                    <div className="flex-shrink-0 w-2 h-2 mt-2 rounded-full bg-gray-300" />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className={`inline-block px-2 py-0.5 rounded text-xs font-semibold ${fromConfig?.color || 'bg-gray-100'}`}>
+                          {fromConfig?.label || change.fromStatus}
+                        </span>
+                        <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                        <span className={`inline-block px-2 py-0.5 rounded text-xs font-semibold ${toConfig?.color || 'bg-gray-100'}`}>
+                          {toConfig?.label || change.toStatus}
+                        </span>
+                      </div>
+                      {change.comment && (
+                        <p className="text-sm text-gray-600 mt-1">{change.comment}</p>
+                      )}
+                      {change.trackingNumber && (
+                        <p className="text-sm text-blue-600 mt-1">
+                          Tracking: {change.trackingCarrier} {change.trackingNumber}
+                        </p>
+                      )}
+                      <p className="text-xs text-gray-400 mt-1">
+                        {formatHistoryDate(change.changedAt)} · {change.changedBy}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </Card>
+        )}
+
+        {/* Edit History */}
+        {order.history.length > 0 && (
+          <Card title="Änderungs-Protokoll" className="mt-6">
+            <div className="space-y-3">
+              {order.history.map((entry) => (
+                <div key={entry.id} className="flex items-start gap-3 pb-3 border-b border-gray-100 last:border-0 last:pb-0">
+                  <div className="flex-shrink-0 w-2 h-2 mt-2 rounded-full bg-orange-300" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm">
+                      <span className="font-semibold">{entry.field}</span> geändert
+                    </p>
+                    {entry.oldValue && entry.newValue && entry.field !== 'items' && (
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        <span className="line-through">{entry.oldValue}</span>
+                        {' → '}
+                        <span className="text-gray-700">{entry.newValue}</span>
+                      </p>
+                    )}
+                    {entry.field === 'items' && (
+                      <p className="text-xs text-gray-500 mt-0.5">Positionen wurden geändert</p>
+                    )}
+                    <p className="text-xs text-gray-400 mt-1">
+                      {formatHistoryDate(entry.changedAt)} · {entry.changedBy}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
 
         {/* Consents */}
         <Card title="Einwilligungen" className="mt-6">

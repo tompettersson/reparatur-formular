@@ -7,6 +7,11 @@ import { revalidatePath } from 'next/cache';
 import { searchProducts } from '@/lib/shopware';
 import type { ProductSuggestion } from '@/lib/shopware';
 import { redirect } from 'next/navigation';
+import {
+  sendEmail,
+  orderConfirmationEmail,
+  adminNewOrderEmail,
+} from '@/lib/email';
 
 export type ActionResult = {
   success: boolean;
@@ -93,6 +98,37 @@ export async function createOrder(formData: OrderFormData): Promise<ActionResult
     });
 
     revalidatePath('/admin/orders');
+
+    // Send confirmation emails (non-blocking)
+    const baseUrl = process.env.NEXTAUTH_URL || 'https://reparatur.kletterschuhe.de';
+    const emailData = {
+      orderNumber: order.orderNumber,
+      customerName: `${validatedData.firstName} ${validatedData.lastName}`,
+      email: validatedData.email,
+      items: order.items.map((item) => ({
+        quantity: item.quantity,
+        manufacturer: item.manufacturer,
+        model: item.model,
+        calculatedPrice: Number(item.calculatedPrice),
+      })),
+      totalPrice,
+      printUrl: `${baseUrl}/order/${order.id}/print`,
+    };
+
+    // Send customer confirmation email
+    const customerEmail = orderConfirmationEmail(emailData);
+    sendEmail(customerEmail).catch((err) =>
+      console.error('Failed to send customer confirmation:', err)
+    );
+
+    // Send admin notification (if configured)
+    const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL;
+    if (adminEmail) {
+      const adminNotification = adminNewOrderEmail(emailData, adminEmail);
+      sendEmail(adminNotification).catch((err) =>
+        console.error('Failed to send admin notification:', err)
+      );
+    }
 
     return { success: true, orderId: order.id };
   } catch (error) {

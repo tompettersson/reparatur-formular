@@ -106,6 +106,10 @@ model Order {
   // Positionen
   items OrderItem[]
 
+  // Audit Trail
+  history       OrderHistory[]
+  statusChanges OrderStatusChange[]
+
   // Berechnete Gesamtsumme (Snapshot)
   totalPrice Decimal? @db.Decimal(10, 2)
 }
@@ -139,10 +143,58 @@ model OrderItem {
 enum OrderStatus {
   DRAFT
   SUBMITTED
+  RECEIVED      // Schuhe sind eingetroffen
+  INSPECTED     // Begutachtet, KVA bestätigt/angepasst
+  REPAIRING     // In Reparatur
+  READY         // Fertig, wartet auf Versand
+  SHIPPED       // Versendet
+  COMPLETED     // Abgeschlossen (Kunde hat erhalten)
+  CANCELLED     // Storniert
+  ON_HOLD       // Rückfrage an Kunde
 }
 
 enum EdgeRubber {
   YES
   NO
   DISCRETION
+}
+
+// ============================================
+// Audit & History Models
+// ============================================
+
+// Protokolliert Änderungen an Order-Feldern
+model OrderHistory {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  field     String   // Welches Feld geändert wurde
+  oldValue  String?  // Alter Wert (JSON serialized)
+  newValue  String?  // Neuer Wert (JSON serialized)
+
+  changedBy String   // Admin-Email oder "SYSTEM"
+  changedAt DateTime @default(now())
+
+  @@index([orderId])
+}
+
+// Protokolliert Status-Änderungen mit Kommentar
+model OrderStatusChange {
+  id        String      @id @default(cuid())
+  orderId   String
+  order     Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  fromStatus OrderStatus
+  toStatus   OrderStatus
+  comment    String?     // Optionaler Kommentar zur Änderung
+
+  // Für SHIPPED: Tracking-Informationen
+  trackingNumber  String?
+  trackingCarrier String?
+
+  changedBy String   // Admin-Email
+  changedAt DateTime @default(now())
+
+  @@index([orderId])
 }
