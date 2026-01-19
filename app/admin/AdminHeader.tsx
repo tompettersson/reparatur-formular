@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { signOut } from 'next-auth/react';
 import { Button } from '@/components/ui/Button';
 
@@ -32,11 +31,9 @@ export function AdminHeader() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link href="/admin/orders" className="flex items-center gap-4">
-              <Image
-                src="/kletterschuhe-logo.png"
+              <img
+                src="/kletterschuhe-logo.svg"
                 alt="kletterschuhe.de"
-                width={160}
-                height={36}
                 className="h-7 w-auto"
               />
               <div className="flex items-center gap-2 px-3 py-1.5 bg-[#ef6a27] text-white rounded-full text-xs font-medium">

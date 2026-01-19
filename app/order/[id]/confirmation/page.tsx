@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import Image from 'next/image';
 import { getOrder } from '../../new/actions';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -48,11 +47,9 @@ export default async function ConfirmationPage({ params }: ConfirmationPageProps
       <header className="bg-white border-b border-[#e5e5e5]">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
-            <Image
-              src="/kletterschuhe-logo.png"
+            <img
+              src="/kletterschuhe-logo.svg"
               alt="kletterschuhe.de"
-              width={160}
-              height={36}
               className="h-7 w-auto"
             />
             <div className="flex items-center gap-2 px-3 py-1.5 bg-[#ef6a27] text-white rounded-full text-xs font-medium">
