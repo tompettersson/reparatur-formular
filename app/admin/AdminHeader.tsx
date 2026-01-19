@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { signOut } from 'next-auth/react';
 import { Button } from '@/components/ui/Button';
+import { KletterschuheLogo } from '@/components/KletterschuheLogo';
 
 // Tool icon for admin header
 const ToolIcon = () => (
@@ -31,11 +32,7 @@ export function AdminHeader() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link href="/admin/orders" className="flex items-center gap-4">
-              <img
-                src="/kletterschuhe-logo.svg"
-                alt="kletterschuhe.de"
-                className="h-7 w-auto"
-              />
+              <KletterschuheLogo className="h-6 w-auto" />
               <div className="flex items-center gap-2 px-3 py-1.5 bg-[#ef6a27] text-white rounded-full text-xs font-medium">
                 <ToolIcon />
                 <span>Admin</span>

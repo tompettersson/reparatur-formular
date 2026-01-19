@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { Stepper, WIZARD_STEPS } from '@/components/Stepper';
+import { KletterschuheLogo } from '@/components/KletterschuheLogo';
 import { Button, ArrowRight, ArrowLeft } from '@/components/ui/Button';
 import { CustomerStep } from './steps/CustomerStep';
 import { ShoesStep } from './steps/ShoesStep';
@@ -124,11 +125,7 @@ export default function OrderWizardPage() {
           <div className="flex items-center justify-between">
             {/* Logo - matching shop style */}
             <div className="flex items-center gap-4">
-              <img
-                src="/kletterschuhe-logo.svg"
-                alt="kletterschuhe.de"
-                className="h-8 w-auto"
-              />
+              <KletterschuheLogo className="h-7 w-auto" />
               <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-[#ef6a27] text-white rounded-full text-sm font-medium">
                 <ToolIcon />
                 <span>Reparaturservice</span>

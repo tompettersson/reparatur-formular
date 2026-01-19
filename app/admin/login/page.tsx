@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
+import { KletterschuheLogo } from '@/components/KletterschuheLogo';
 
 // Tool icon for admin
 const ToolIcon = () => (
@@ -59,11 +60,7 @@ export default function AdminLoginPage() {
     <div className="min-h-screen bg-[#f5f5f4] flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <div className="text-center mb-8">
-          <img
-            src="/kletterschuhe-logo.svg"
-            alt="kletterschuhe.de"
-            className="h-10 w-auto mx-auto mb-4"
-          />
+          <KletterschuheLogo className="h-8 w-auto mx-auto mb-4" />
           <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#ef6a27] text-white rounded-full text-sm font-medium mb-4">
             <ToolIcon />
             <span>Admin-Bereich</span>
