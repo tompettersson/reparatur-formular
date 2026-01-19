@@ -20,14 +20,13 @@ const StepIcons = {
       <circle cx="12" cy="7" r="4" />
     </svg>
   ),
-  // Boot/hiking shoe icon - clean side profile
+  // Simple sneaker icon - side profile
   shoes: (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      {/* Boot outline - side view */}
-      <path d="M3 18h18v1a1 1 0 01-1 1H4a1 1 0 01-1-1v-1z" />
-      <path d="M5 18V9a2 2 0 012-2h2l1 2h6a4 4 0 014 4v5" />
-      <path d="M5 13h3" />
-      <circle cx="17" cy="15" r="1" />
+      <path d="M2 18h20v2a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-2z" />
+      <path d="M2 18c0-3 1-5 4-6l3-1c2-.5 4-2 5-4l1.5 1c.5 1 1.5 2 3.5 2h3v8" />
+      <circle cx="6" cy="19" r="1" fill="currentColor" />
+      <circle cx="18" cy="19" r="1" fill="currentColor" />
     </svg>
   ),
   summary: (
