@@ -39,7 +39,7 @@ export function Card({
       {(title || subtitle || icon) && (
         <div className="flex items-start gap-4 mb-5 pb-5 border-b border-[#f5f5f4]">
           {icon && (
-            <div className="flex-shrink-0 w-12 h-12 rounded-[12px] bg-gradient-to-br from-[#fff7ed] to-[#ffedd5] flex items-center justify-center text-[#ef6a27]">
+            <div className="flex-shrink-0 w-12 h-12 rounded-[12px] bg-[#fff7ed] flex items-center justify-center text-[#ef6a27]">
               {icon}
             </div>
           )}

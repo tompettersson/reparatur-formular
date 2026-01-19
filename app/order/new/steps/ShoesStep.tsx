@@ -325,7 +325,7 @@ export function ShoesStep({ register, errors, watch, control }: ShoesStepProps) 
       </Button>
 
       {/* Gesamtsumme */}
-      <Card className="bg-gradient-to-r from-[#efa335]/10 to-[#ef6a27]/10 border-2 border-[#ef6a27]">
+      <Card className="bg-[#fff7ed] border-2 border-[#ef6a27]">
         <div className="flex items-center justify-between">
           <span className="text-lg font-semibold text-[#38362d]">Kostenvoranschlag (KVA)</span>
           <span className="text-2xl font-bold text-[#ef6a27]">{formatPrice(totalPrice)}</span>

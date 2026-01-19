@@ -8,7 +8,7 @@ export function PrintButton() {
   return (
     <button
       onClick={handlePrint}
-      className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#efa335] to-[#ef6a27] text-white font-semibold rounded-lg shadow-lg hover:opacity-90 transition-opacity"
+      className="flex items-center gap-2 px-6 py-3 bg-[#ef6a27] text-white font-semibold rounded-lg shadow-[0_2px_4px_rgba(239,106,39,0.2)] hover:bg-[#dc5a1a] transition-colors"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"

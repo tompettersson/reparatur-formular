@@ -1,11 +1,28 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
+
+// Tool icon for admin
+const ToolIcon = () => (
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+  </svg>
+);
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -40,14 +57,21 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f3f3f3] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#f5f5f4] flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-gradient-to-r from-[#efa335] to-[#ef6a27] rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-white font-bold text-2xl">K</span>
+          <Image
+            src="/kletterschuhe-logo.png"
+            alt="kletterschuhe.de"
+            width={200}
+            height={45}
+            className="h-10 w-auto mx-auto mb-4"
+          />
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#ef6a27] text-white rounded-full text-sm font-medium mb-4">
+            <ToolIcon />
+            <span>Admin-Bereich</span>
           </div>
-          <h1 className="text-2xl font-bold text-[#38362d]">Admin Login</h1>
-          <p className="text-gray-500 mt-2">kletterschuhe.de Reparatur-System</p>
+          <p className="text-gray-500">Reparatur-System</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">

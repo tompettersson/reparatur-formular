@@ -38,7 +38,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
                   ? 'border-[#ef4444]'
                   : 'border-[#d6d3d1] hover:border-[#a8a29e] checked:border-transparent'
                 }
-                checked:bg-gradient-to-br checked:from-[#efa335] checked:via-[#ef6a27] checked:to-[#ea580c]
+                checked:bg-[#ef6a27]
                 focus:outline-none focus:ring-4 focus:ring-[#ef6a27]/10
                 ${className}
               `}

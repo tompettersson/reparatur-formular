@@ -10,7 +10,7 @@
    ============================================ */
 
 :root {
-  /* Primary Palette - Sunset Orange */
+  /* Primary Palette - Flat Orange (kletterschuhe.de) */
   --color-primary: #ef6a27;
   --color-primary-50: #fff7ed;
   --color-primary-100: #ffedd5;
@@ -18,12 +18,12 @@
   --color-primary-300: #fdba74;
   --color-primary-400: #fb923c;
   --color-primary-500: #ef6a27;
-  --color-primary-600: #ea580c;
+  --color-primary-600: #dc5a1a;
   --color-primary-700: #c2410c;
   --color-primary-800: #9a3412;
   --color-primary-900: #7c2d12;
 
-  /* Secondary Palette - Alpine Teal */
+  /* Secondary Palette - Flat Teal */
   --color-secondary: #3ca1ac;
   --color-secondary-50: #f0fdfa;
   --color-secondary-100: #ccfbf1;
@@ -31,7 +31,7 @@
   --color-secondary-300: #5eead4;
   --color-secondary-400: #2dd4bf;
   --color-secondary-500: #3ca1ac;
-  --color-secondary-600: #0d9488;
+  --color-secondary-600: #329299;
   --color-secondary-700: #0f766e;
   --color-secondary-800: #115e59;
   --color-secondary-900: #134e4a;
@@ -56,6 +56,9 @@
   --color-lighter: #fafaf9;
   --color-white: #ffffff;
 
+  /* Logo Text Color */
+  --color-logo: #5a5a5a;
+
   /* Status Colors */
   --color-success: #22c55e;
   --color-success-bg: #dcfce7;
@@ -64,12 +67,13 @@
   --color-error: #ef4444;
   --color-error-bg: #fee2e2;
 
-  /* Gradients */
-  --gradient-primary: linear-gradient(135deg, #efa335 0%, #ef6a27 50%, #ea580c 100%);
-  --gradient-primary-hover: linear-gradient(135deg, #fb923c 0%, #ef6a27 50%, #c2410c 100%);
-  --gradient-secondary: linear-gradient(135deg, #5eead4 0%, #3ca1ac 50%, #0d9488 100%);
-  --gradient-dark: linear-gradient(135deg, #44403c 0%, #292524 100%);
-  --gradient-subtle: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(245,245,244,0.5) 100%);
+  /* FLAT colors - no gradients in UI */
+  --flat-orange: #ef6a27;
+  --flat-orange-hover: #dc5a1a;
+  --flat-orange-active: #c2410c;
+  --flat-teal: #3ca1ac;
+  --flat-teal-hover: #329299;
+  --flat-dark: #38362d;
 
   /* Shadows - Layered Depth */
   --shadow-xs: 0 1px 2px rgba(0,0,0,0.04);
@@ -419,10 +423,9 @@ input, select, textarea, button {
 
 .stepper-track-progress {
   height: 100%;
-  background: var(--gradient-primary);
+  background: var(--flat-orange);
   border-radius: var(--radius-full);
   transition: width 0.6s var(--ease-out-expo);
-  animation: progressGlow 2s ease-in-out infinite;
 }
 
 .stepper-item {
@@ -461,15 +464,15 @@ input, select, textarea, button {
 }
 
 .stepper-item.active .stepper-icon {
-  background: radial-gradient(circle at 30% 30%, #fb923c 0%, #ef6a27 50%, #ea580c 100%);
+  background: var(--flat-orange);
   color: white;
   border-color: transparent;
-  box-shadow: var(--shadow-lg), var(--shadow-glow);
-  transform: scale(1.1);
+  box-shadow: 0 2px 8px rgba(239, 106, 39, 0.3);
+  transform: scale(1.05);
 }
 
 .stepper-item.active .stepper-icon::before {
-  background: rgba(239, 106, 39, 0.1);
+  background: rgba(239, 106, 39, 0.08);
 }
 
 .stepper-item.completed .stepper-icon {
@@ -547,30 +550,30 @@ input, select, textarea, button {
 }
 
 .btn-primary {
-  background: var(--gradient-primary);
+  background: var(--flat-orange);
   color: white;
-  box-shadow: var(--shadow-md), 0 4px 12px rgba(239, 106, 39, 0.25);
+  box-shadow: 0 2px 4px rgba(239, 106, 39, 0.2);
 }
 
 .btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg), 0 8px 20px rgba(239, 106, 39, 0.3);
+  background: var(--flat-orange-hover);
+  box-shadow: 0 4px 8px rgba(239, 106, 39, 0.25);
 }
 
 .btn-primary:active {
-  transform: translateY(0);
-  box-shadow: var(--shadow-sm), 0 2px 8px rgba(239, 106, 39, 0.2);
+  background: var(--flat-orange-active);
+  box-shadow: 0 1px 2px rgba(239, 106, 39, 0.2);
 }
 
 .btn-secondary {
-  background: var(--gradient-secondary);
+  background: var(--flat-teal);
   color: white;
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 2px 4px rgba(60, 161, 172, 0.2);
 }
 
 .btn-secondary:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+  background: var(--flat-teal-hover);
+  box-shadow: 0 4px 8px rgba(60, 161, 172, 0.25);
 }
 
 .btn-outline {
@@ -708,7 +711,7 @@ input, select, textarea, button {
 }
 
 .checkbox-input:checked {
-  background: var(--gradient-primary);
+  background: var(--flat-orange);
   border-color: transparent;
 }
 
@@ -801,23 +804,22 @@ input, select, textarea, button {
 .logo-mark {
   width: 48px;
   height: 48px;
-  background: var(--gradient-primary);
-  border-radius: var(--radius-lg);
+  background: var(--flat-orange);
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: var(--shadow-md), 0 4px 12px rgba(239, 106, 39, 0.2);
+  box-shadow: 0 2px 6px rgba(239, 106, 39, 0.2);
   transition: all 0.3s var(--ease-out-expo);
 }
 
 .logo-mark:hover {
-  transform: rotate(-5deg) scale(1.05);
-  box-shadow: var(--shadow-lg), 0 8px 20px rgba(239, 106, 39, 0.25);
+  background: var(--flat-orange-hover);
 }
 
 .logo-mark svg {
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   color: white;
 }
 

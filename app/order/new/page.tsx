@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { Stepper, WIZARD_STEPS } from '@/components/Stepper';
 import { Button, ArrowRight, ArrowLeft } from '@/components/ui/Button';
 import { CustomerStep } from './steps/CustomerStep';
@@ -12,20 +13,19 @@ import { SummaryStep } from './steps/SummaryStep';
 import { orderSchema, OrderFormData } from '@/lib/validation';
 import { createOrder } from './actions';
 
-// Climbing shoe icon for logo
-const ShoeIcon = () => (
+// Hammer/tool icon for repair service
+const ToolIcon = () => (
   <svg
-    width="28"
-    height="28"
+    width="22"
+    height="22"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
-    strokeWidth="2"
+    strokeWidth="2.5"
     strokeLinecap="round"
     strokeLinejoin="round"
   >
-    <path d="M2 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2H2v2z" />
-    <path d="M2 16l2-9a2 2 0 0 1 2-2h3l2 4h6l2-4h3a2 2 0 0 1 2 2l2 9" />
+    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
   </svg>
 );
 
@@ -119,32 +119,30 @@ export default function OrderWizardPage() {
 
   return (
     <div className="min-h-screen bg-[#f5f5f4] flex flex-col">
-      {/* Header */}
-      <header className="bg-white/90 backdrop-blur-xl border-b border-[#e7e5e4] sticky top-0 z-50">
+      {/* Header - Clean, flat design matching shop */}
+      <header className="bg-white border-b border-[#e5e5e5] sticky top-0 z-50">
         <div className="max-w-[1000px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
-            {/* Logo */}
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-[#efa335] via-[#ef6a27] to-[#ea580c] rounded-[14px] flex items-center justify-center shadow-lg shadow-[#ef6a27]/20 transition-transform duration-300 hover:rotate-[-5deg] hover:scale-105">
-                <ShoeIcon />
-              </div>
-              <div>
-                <h1
-                  className="text-xl font-extrabold text-[#38362d] tracking-tight leading-tight"
-                  style={{ fontFamily: 'var(--font-display)' }}
-                >
-                  kletterschuhe.de
-                </h1>
-                <p className="text-xs text-[#78716c] font-medium uppercase tracking-wider">
-                  Reparatur-Auftrag
-                </p>
+            {/* Logo - matching shop style */}
+            <div className="flex items-center gap-4">
+              <Image
+                src="/kletterschuhe-logo.png"
+                alt="kletterschuhe.de"
+                width={180}
+                height={40}
+                className="h-8 w-auto"
+                priority
+              />
+              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-[#ef6a27] text-white rounded-full text-sm font-medium">
+                <ToolIcon />
+                <span>Reparaturservice</span>
               </div>
             </div>
 
             {/* Help link */}
             <a
               href="mailto:info@kletterschuhe.de"
-              className="hidden sm:flex items-center gap-2 text-sm text-[#78716c] hover:text-[#ef6a27] transition-colors"
+              className="flex items-center gap-2 text-sm text-[#78716c] hover:text-[#ef6a27] transition-colors"
             >
               <svg
                 width="18"
@@ -160,7 +158,7 @@ export default function OrderWizardPage() {
                 <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
                 <path d="M12 17h.01" />
               </svg>
-              Hilfe
+              <span className="hidden sm:inline">Hilfe</span>
             </a>
           </div>
         </div>

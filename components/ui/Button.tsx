@@ -90,21 +90,19 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
     const variants = {
       primary: `
-        bg-gradient-to-br from-[#efa335] via-[#ef6a27] to-[#ea580c]
+        bg-[#ef6a27]
         text-white
-        shadow-[0_4px_6px_-1px_rgba(0,0,0,0.07),0_2px_4px_-1px_rgba(0,0,0,0.04),0_4px_12px_rgba(239,106,39,0.25)]
-        hover:shadow-[0_10px_15px_-3px_rgba(0,0,0,0.08),0_4px_6px_-2px_rgba(0,0,0,0.04),0_8px_20px_rgba(239,106,39,0.3)]
-        hover:-translate-y-0.5
-        active:translate-y-0 active:shadow-[0_1px_3px_rgba(0,0,0,0.06),0_2px_8px_rgba(239,106,39,0.2)]
+        shadow-[0_2px_4px_rgba(239,106,39,0.2)]
+        hover:bg-[#dc5a1a] hover:shadow-[0_4px_8px_rgba(239,106,39,0.25)]
+        active:bg-[#c2410c] active:shadow-[0_1px_2px_rgba(239,106,39,0.2)]
         focus-visible:ring-[#ef6a27]/30
       `,
       secondary: `
-        bg-gradient-to-br from-[#5eead4] via-[#3ca1ac] to-[#0d9488]
+        bg-[#3ca1ac]
         text-white
-        shadow-[0_4px_6px_-1px_rgba(0,0,0,0.07),0_2px_4px_-1px_rgba(0,0,0,0.04)]
-        hover:shadow-[0_10px_15px_-3px_rgba(0,0,0,0.08),0_4px_6px_-2px_rgba(0,0,0,0.04)]
-        hover:-translate-y-0.5
-        active:translate-y-0
+        shadow-[0_2px_4px_rgba(60,161,172,0.2)]
+        hover:bg-[#329299] hover:shadow-[0_4px_8px_rgba(60,161,172,0.25)]
+        active:bg-[#287f88]
         focus-visible:ring-[#3ca1ac]/30
       `,
       outline: `
