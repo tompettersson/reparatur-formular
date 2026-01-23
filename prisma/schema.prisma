@@ -77,26 +77,32 @@ model Order {
   updatedAt   DateTime    @updatedAt
 
   // Rechnungsadresse
-  salutation String
-  firstName  String
-  lastName   String
-  street     String
-  zip        String
-  city       String
-  phone      String
-  email      String
+  salutation  String
+  firstName   String
+  lastName    String
+  street      String
+  houseNumber String   @default("") // NEU: Hausnummer separat
+  zip         String
+  city        String
+  country     String   @default("DE") // NEU: Land (ISO 3166-1 alpha-2)
+  phone       String
+  email       String
 
   // Lieferadresse (optional, wenn abweichend)
-  deliverySame       Boolean @default(true)
-  deliverySalutation String?
-  deliveryFirstName  String?
-  deliveryLastName   String?
-  deliveryStreet     String?
-  deliveryZip        String?
-  deliveryCity       String?
+  deliverySame        Boolean @default(true)
+  deliverySalutation  String?
+  deliveryFirstName   String?
+  deliveryLastName    String?
+  deliveryStreet      String?
+  deliveryHouseNumber String? // NEU: Hausnummer separat
+  deliveryZip         String?
+  deliveryCity        String?
+  deliveryCountry     String? // NEU: Land
 
-  // Zusätzliche Informationen
-  stationNotes String? // Poststation/Hinweise
+  // Packstation/DHL (NEU: separate Felder)
+  packstationNumber String? // z.B. "123"
+  postNumber        String? // DHL Postnummer
+  deliveryNotes     String? // Sonstige Lieferhinweise
 
   // Einwilligungen
   gdprAccepted Boolean
@@ -120,18 +126,20 @@ model OrderItem {
   order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   // Schuh-Details
-  quantity     Int    @default(1)
+  quantity     Decimal @default(1) @db.Decimal(3, 1) // NEU: 0.5 = Einzelschuh
   manufacturer String
   model        String
   color        String?
   size         String
 
   // Reparatur-Optionen
-  sole           String     // z.B. "vibram_xs_grip_2", "original"
-  edgeRubber     EdgeRubber // YES, NO, DISCRETION
-  closure        Boolean    @default(false)
-  additionalWork String?    // Zusatzarbeiten (Freitext)
-  internalNotes  String?    // Interne Bemerkung
+  sole              String     // z.B. "vibram_xs_grip_2", "original"
+  edgeRubber        EdgeRubber // YES, NO, DISCRETION
+  closure           Boolean    @default(false)
+  disinfection      Boolean    @default(false) // NEU: Desinfektion (+3€)
+  trustProfessionals Boolean   @default(false) // NEU: "Profis machen lassen"
+  additionalWork    String?    // Zusatzarbeiten (Freitext)
+  internalNotes     String?    // Interne Bemerkung
 
   // Preis-Snapshot (KVA)
   calculatedPrice Decimal @db.Decimal(10, 2)

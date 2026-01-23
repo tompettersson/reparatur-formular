@@ -33,8 +33,10 @@ export async function createOrder(formData: OrderFormData): Promise<ActionResult
         firstName: validatedData.firstName,
         lastName: validatedData.lastName,
         street: validatedData.street,
+        houseNumber: validatedData.houseNumber,
         zip: validatedData.zip,
         city: validatedData.city,
+        country: validatedData.country,
         phone: validatedData.phone,
         email: validatedData.email,
 
@@ -44,11 +46,15 @@ export async function createOrder(formData: OrderFormData): Promise<ActionResult
         deliveryFirstName: validatedData.deliveryFirstName,
         deliveryLastName: validatedData.deliveryLastName,
         deliveryStreet: validatedData.deliveryStreet,
+        deliveryHouseNumber: validatedData.deliveryHouseNumber,
         deliveryZip: validatedData.deliveryZip,
         deliveryCity: validatedData.deliveryCity,
+        deliveryCountry: validatedData.deliveryCountry,
 
-        // Zusatz
-        stationNotes: validatedData.stationNotes,
+        // Packstation/DHL (NEU: separate Felder)
+        packstationNumber: validatedData.packstationNumber,
+        postNumber: validatedData.postNumber,
+        deliveryNotes: validatedData.deliveryNotes,
 
         // Einwilligungen
         gdprAccepted: Boolean(validatedData.gdprAccepted),
@@ -66,9 +72,11 @@ export async function createOrder(formData: OrderFormData): Promise<ActionResult
             model: item.model,
             color: item.color || '',
             size: item.size,
-            sole: item.sole,
+            sole: item.sole || '', // Kann leer sein bei "Profis machen lassen"
             edgeRubber: item.edgeRubber,
             closure: item.closure,
+            disinfection: item.disinfection,
+            trustProfessionals: item.trustProfessionals,
             additionalWork: item.additionalWork,
             internalNotes: item.internalNotes,
             calculatedPrice: calculateItemPrice({
@@ -76,7 +84,8 @@ export async function createOrder(formData: OrderFormData): Promise<ActionResult
               sole: item.sole as any,
               edgeRubber: item.edgeRubber,
               closure: item.closure,
-              hasAdditionalWork: !!item.additionalWork,
+              disinfection: item.disinfection,
+              trustProfessionals: item.trustProfessionals,
             }),
           })),
         },
@@ -106,7 +115,7 @@ export async function createOrder(formData: OrderFormData): Promise<ActionResult
       customerName: `${validatedData.firstName} ${validatedData.lastName}`,
       email: validatedData.email,
       items: order.items.map((item) => ({
-        quantity: item.quantity,
+        quantity: Number(item.quantity),
         manufacturer: item.manufacturer,
         model: item.model,
         calculatedPrice: Number(item.calculatedPrice),
@@ -196,16 +205,20 @@ export type CustomerData = {
   lastName?: string;
   salutation?: string;
   street?: string;
+  houseNumber?: string;
   zip?: string;
   city?: string;
+  country?: string;
   phone?: string;
   deliverySame?: boolean;
   deliverySalutation?: string;
   deliveryFirstName?: string;
   deliveryLastName?: string;
   deliveryStreet?: string;
+  deliveryHouseNumber?: string;
   deliveryZip?: string;
   deliveryCity?: string;
+  deliveryCountry?: string;
 };
 
 export async function findCustomerByEmail(email: string): Promise<CustomerData> {
@@ -227,16 +240,20 @@ export async function findCustomerByEmail(email: string): Promise<CustomerData> 
         firstName: true,
         lastName: true,
         street: true,
+        houseNumber: true,
         zip: true,
         city: true,
+        country: true,
         phone: true,
         deliverySame: true,
         deliverySalutation: true,
         deliveryFirstName: true,
         deliveryLastName: true,
         deliveryStreet: true,
+        deliveryHouseNumber: true,
         deliveryZip: true,
         deliveryCity: true,
+        deliveryCountry: true,
       },
     });
 
@@ -250,16 +267,20 @@ export async function findCustomerByEmail(email: string): Promise<CustomerData> 
       firstName: order.firstName,
       lastName: order.lastName,
       street: order.street,
+      houseNumber: order.houseNumber,
       zip: order.zip,
       city: order.city,
+      country: order.country,
       phone: order.phone,
       deliverySame: order.deliverySame,
       deliverySalutation: order.deliverySalutation || undefined,
       deliveryFirstName: order.deliveryFirstName || undefined,
       deliveryLastName: order.deliveryLastName || undefined,
       deliveryStreet: order.deliveryStreet || undefined,
+      deliveryHouseNumber: order.deliveryHouseNumber || undefined,
       deliveryZip: order.deliveryZip || undefined,
       deliveryCity: order.deliveryCity || undefined,
+      deliveryCountry: order.deliveryCountry || undefined,
     };
   } catch (error) {
     console.error('Error finding customer:', error);

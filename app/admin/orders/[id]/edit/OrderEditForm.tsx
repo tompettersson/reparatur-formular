@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition, useEffect } from 'react';
+import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { Card } from '@/components/ui/Card';
@@ -13,12 +13,14 @@ import {
   SOLE_PRICES,
   MANUFACTURERS,
   SHOE_SIZES,
+  QUANTITY_OPTIONS,
   ADDITIONAL_PRICES,
   calculateItemPrice,
   formatPrice,
   type SoleType,
   type EdgeRubberOption,
 } from '@/lib/pricing';
+import { SUPPORTED_COUNTRIES } from '@/lib/validation';
 import type { Order, OrderItem, EdgeRubber } from '@/app/generated/prisma/client';
 
 const SALUTATIONS = [
@@ -26,6 +28,11 @@ const SALUTATIONS = [
   { value: 'Frau', label: 'Frau' },
   { value: 'Divers', label: 'Divers' },
 ];
+
+const COUNTRY_OPTIONS = SUPPORTED_COUNTRIES.map(c => ({
+  value: c.code,
+  label: c.label,
+}));
 
 const SOLE_OPTIONS = Object.entries(SOLE_PRICES).map(([value, info]) => ({
   value,
@@ -44,8 +51,10 @@ interface FormData {
     firstName: string;
     lastName: string;
     street: string;
+    houseNumber: string;
     zip: string;
     city: string;
+    country: string;
     phone: string;
     email: string;
     deliverySame: boolean;
@@ -53,9 +62,13 @@ interface FormData {
     deliveryFirstName: string;
     deliveryLastName: string;
     deliveryStreet: string;
+    deliveryHouseNumber: string;
     deliveryZip: string;
     deliveryCity: string;
-    stationNotes: string;
+    deliveryCountry: string;
+    packstationNumber: string;
+    postNumber: string;
+    deliveryNotes: string;
   };
   items: Array<{
     id: string;
@@ -67,6 +80,8 @@ interface FormData {
     sole: string;
     edgeRubber: EdgeRubber;
     closure: boolean;
+    disinfection: boolean;
+    trustProfessionals: boolean;
     additionalWork: string;
     internalNotes: string;
   }>;
@@ -88,8 +103,10 @@ export function OrderEditForm({ order }: OrderEditFormProps) {
         firstName: order.firstName,
         lastName: order.lastName,
         street: order.street,
+        houseNumber: order.houseNumber,
         zip: order.zip,
         city: order.city,
+        country: order.country,
         phone: order.phone,
         email: order.email,
         deliverySame: order.deliverySame,
@@ -97,13 +114,17 @@ export function OrderEditForm({ order }: OrderEditFormProps) {
         deliveryFirstName: order.deliveryFirstName || '',
         deliveryLastName: order.deliveryLastName || '',
         deliveryStreet: order.deliveryStreet || '',
+        deliveryHouseNumber: order.deliveryHouseNumber || '',
         deliveryZip: order.deliveryZip || '',
         deliveryCity: order.deliveryCity || '',
-        stationNotes: order.stationNotes || '',
+        deliveryCountry: order.deliveryCountry || 'DE',
+        packstationNumber: order.packstationNumber || '',
+        postNumber: order.postNumber || '',
+        deliveryNotes: order.deliveryNotes || '',
       },
       items: order.items.map((item) => ({
         id: item.id,
-        quantity: item.quantity,
+        quantity: Number(item.quantity),
         manufacturer: item.manufacturer,
         model: item.model,
         color: item.color || '',
@@ -111,6 +132,8 @@ export function OrderEditForm({ order }: OrderEditFormProps) {
         sole: item.sole,
         edgeRubber: item.edgeRubber,
         closure: item.closure,
+        disinfection: item.disinfection,
+        trustProfessionals: item.trustProfessionals,
         additionalWork: item.additionalWork || '',
         internalNotes: item.internalNotes || '',
       })),
@@ -132,7 +155,8 @@ export function OrderEditForm({ order }: OrderEditFormProps) {
       sole: item.sole as SoleType,
       edgeRubber: item.edgeRubber as EdgeRubberOption,
       closure: item.closure,
-      hasAdditionalWork: Boolean(item.additionalWork?.trim()),
+      disinfection: item.disinfection,
+      trustProfessionals: item.trustProfessionals,
     })
   );
 
@@ -150,9 +174,13 @@ export function OrderEditForm({ order }: OrderEditFormProps) {
           deliveryFirstName: data.customer.deliverySame ? null : data.customer.deliveryFirstName || null,
           deliveryLastName: data.customer.deliverySame ? null : data.customer.deliveryLastName || null,
           deliveryStreet: data.customer.deliverySame ? null : data.customer.deliveryStreet || null,
+          deliveryHouseNumber: data.customer.deliverySame ? null : data.customer.deliveryHouseNumber || null,
           deliveryZip: data.customer.deliverySame ? null : data.customer.deliveryZip || null,
           deliveryCity: data.customer.deliverySame ? null : data.customer.deliveryCity || null,
-          stationNotes: data.customer.stationNotes || null,
+          deliveryCountry: data.customer.deliverySame ? null : data.customer.deliveryCountry || null,
+          packstationNumber: data.customer.packstationNumber || null,
+          postNumber: data.customer.postNumber || null,
+          deliveryNotes: data.customer.deliveryNotes || null,
         },
         items: data.items.map((item, index) => ({
           ...item,
@@ -194,10 +222,14 @@ export function OrderEditForm({ order }: OrderEditFormProps) {
             error={errors.customer?.lastName?.message}
           />
           <Input
-            label="Straße & Hausnummer"
+            label="Straße"
             {...register('customer.street', { required: true })}
             error={errors.customer?.street?.message}
-            className="md:col-span-2"
+          />
+          <Input
+            label="Hausnummer"
+            {...register('customer.houseNumber', { required: true })}
+            error={errors.customer?.houseNumber?.message}
           />
           <Input
             label="PLZ"
@@ -209,6 +241,12 @@ export function OrderEditForm({ order }: OrderEditFormProps) {
             {...register('customer.city', { required: true })}
             error={errors.customer?.city?.message}
           />
+          <Select
+            label="Land"
+            options={COUNTRY_OPTIONS}
+            {...register('customer.country', { required: true })}
+          />
+          <div /> {/* Spacer */}
           <Input
             label="Telefon"
             type="tel"
@@ -247,9 +285,12 @@ export function OrderEditForm({ order }: OrderEditFormProps) {
                 {...register('customer.deliveryLastName')}
               />
               <Input
-                label="Straße & Hausnummer"
+                label="Straße"
                 {...register('customer.deliveryStreet')}
-                className="md:col-span-2"
+              />
+              <Input
+                label="Hausnummer"
+                {...register('customer.deliveryHouseNumber')}
               />
               <Input
                 label="PLZ"
@@ -259,14 +300,31 @@ export function OrderEditForm({ order }: OrderEditFormProps) {
                 label="Stadt"
                 {...register('customer.deliveryCity')}
               />
+              <Select
+                label="Land"
+                options={COUNTRY_OPTIONS}
+                {...register('customer.deliveryCountry')}
+              />
             </div>
           )}
 
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <Input
+              label="Packstation-Nummer"
+              {...register('customer.packstationNumber')}
+              placeholder="z.B. 123"
+            />
+            <Input
+              label="DHL Postnummer"
+              {...register('customer.postNumber')}
+              placeholder="z.B. 12345678"
+            />
+          </div>
           <div className="mt-4">
             <Input
-              label="Lieferhinweise (Packstation etc.)"
-              {...register('customer.stationNotes')}
-              placeholder="z.B. Packstation 123, Postnummer 12345678"
+              label="Lieferhinweise"
+              {...register('customer.deliveryNotes')}
+              placeholder="z.B. Bitte bei Nachbar abgeben..."
             />
           </div>
         </div>
@@ -288,11 +346,9 @@ export function OrderEditForm({ order }: OrderEditFormProps) {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Input
-                  label="Anzahl (Paar)"
-                  type="number"
-                  min={1}
-                  max={10}
+                <Select
+                  label="Anzahl (Schuhpaar)"
+                  options={QUANTITY_OPTIONS.map(opt => ({ value: opt.value, label: opt.label }))}
                   {...register(`items.${index}.quantity`, { valueAsNumber: true })}
                 />
                 <Select
@@ -325,17 +381,31 @@ export function OrderEditForm({ order }: OrderEditFormProps) {
                 />
                 <div className="flex items-end pb-2">
                   <Checkbox
-                    label={`Verschluss-Reparatur (+${ADDITIONAL_PRICES.closure}€)`}
+                    label={`Verschluss (+${ADDITIONAL_PRICES.closure}€ Paarpreis)`}
                     {...register(`items.${index}.closure`)}
                   />
                 </div>
+                <div className="flex items-end pb-2">
+                  <Checkbox
+                    label={`Desinfektion (+${ADDITIONAL_PRICES.disinfection}€)`}
+                    {...register(`items.${index}.disinfection`)}
+                  />
+                </div>
+              </div>
+
+              <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
+                <Checkbox
+                  label="Profis machen lassen"
+                  description="Kunde überlässt die Auswahl den Experten"
+                  {...register(`items.${index}.trustProfessionals`)}
+                />
               </div>
 
               <div className="mt-4">
                 <Input
                   label="Zusatzarbeiten (Kunde)"
                   {...register(`items.${index}.additionalWork`)}
-                  placeholder="z.B. Desinfektion, Fersen-Polster erneuern..."
+                  placeholder="z.B. Fersenschlaufe nähen..."
                 />
               </div>
 

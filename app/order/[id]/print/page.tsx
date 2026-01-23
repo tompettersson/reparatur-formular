@@ -3,12 +3,12 @@ import { notFound } from 'next/navigation';
 import { PrintButton } from './PrintButton';
 import './print.css';
 
-// Versandadresse kletterschuhe.de
+// Versandadresse kletterschuhe.de (KORRIGIERT: Hadamar statt Efringen-Kirchen)
 const SHOP_ADDRESS = {
   name: 'kletterschuhe.de',
-  street: 'Franz-Gensler-Straße 9',
-  zip: '79588',
-  city: 'Efringen-Kirchen',
+  street: 'Franz-Gensler-Str. 7-9',
+  zip: '65589',
+  city: 'Hadamar',
 };
 
 // Sohlen-Namen für Anzeige
@@ -104,8 +104,11 @@ export default async function PrintPage({ params }: PrintPageProps) {
             <p className="font-semibold">
               {order.salutation} {order.firstName} {order.lastName}
             </p>
-            <p>{order.street}</p>
+            <p>{order.street} {order.houseNumber}</p>
             <p>{order.zip} {order.city}</p>
+            {order.country && order.country !== 'DE' && (
+              <p>{order.country}</p>
+            )}
             <p className="text-sm mt-2">
               Tel: {order.phone}<br />
               E-Mail: {order.email}
@@ -117,8 +120,11 @@ export default async function PrintPage({ params }: PrintPageProps) {
               <p className="font-semibold">
                 {order.deliverySalutation} {order.deliveryFirstName} {order.deliveryLastName}
               </p>
-              <p>{order.deliveryStreet}</p>
+              <p>{order.deliveryStreet} {order.deliveryHouseNumber}</p>
               <p>{order.deliveryZip} {order.deliveryCity}</p>
+              {order.deliveryCountry && order.deliveryCountry !== 'DE' && (
+                <p>{order.deliveryCountry}</p>
+              )}
             </div>
           )}
         </div>
@@ -142,7 +148,7 @@ export default async function PrintPage({ params }: PrintPageProps) {
             <tbody>
               {order.items.map((item) => (
                 <tr key={item.id}>
-                  <td className="text-center">{item.quantity}</td>
+                  <td className="text-center">{Number(item.quantity)}</td>
                   <td>{item.manufacturer}</td>
                   <td>
                     {item.model}
@@ -185,11 +191,19 @@ export default async function PrintPage({ params }: PrintPageProps) {
           </section>
         )}
 
-        {/* Station Notes */}
-        {order.stationNotes && (
+        {/* Packstation/Lieferhinweise */}
+        {(order.packstationNumber || order.postNumber || order.deliveryNotes) && (
           <section className="notes-section">
             <h3 className="section-subtitle">Hinweise zur Lieferung:</h3>
-            <p>{order.stationNotes}</p>
+            {order.packstationNumber && (
+              <p><strong>Packstation:</strong> {order.packstationNumber}</p>
+            )}
+            {order.postNumber && (
+              <p><strong>Postnummer:</strong> {order.postNumber}</p>
+            )}
+            {order.deliveryNotes && (
+              <p><strong>Hinweis:</strong> {order.deliveryNotes}</p>
+            )}
           </section>
         )}
 
@@ -219,7 +233,7 @@ export default async function PrintPage({ params }: PrintPageProps) {
         <footer className="print-footer">
           <p>Vielen Dank für Ihren Auftrag!</p>
           <p className="text-sm text-gray-500">
-            kletterschuhe.de | Franz-Gensler-Straße 9 | 79588 Efringen-Kirchen
+            kletterschuhe.de | Franz-Gensler-Str. 7-9 | 65589 Hadamar
           </p>
         </footer>
       </div>

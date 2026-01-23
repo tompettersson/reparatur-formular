@@ -20,7 +20,8 @@ export function SummaryStep({ watch }: SummaryStepProps) {
       sole: item.sole as SoleType,
       edgeRubber: item.edgeRubber || 'NO',
       closure: item.closure || false,
-      hasAdditionalWork: !!item.additionalWork,
+      disinfection: item.disinfection || false,
+      trustProfessionals: item.trustProfessionals || false,
     });
   }, 0) || 0;
 
@@ -39,8 +40,9 @@ export function SummaryStep({ watch }: SummaryStepProps) {
             <h4 className="font-semibold text-[#38362d] mb-2">Rechnungsadresse</h4>
             <address className="not-italic text-gray-600">
               {formData.salutation} {formData.firstName} {formData.lastName}<br />
-              {formData.street}<br />
+              {formData.street} {formData.houseNumber}<br />
               {formData.zip} {formData.city}<br />
+              {formData.country && formData.country !== 'DE' && <>{formData.country}<br /></>}
               <br />
               Tel: {formData.phone}<br />
               E-Mail: {formData.email}
@@ -54,17 +56,20 @@ export function SummaryStep({ watch }: SummaryStepProps) {
             ) : (
               <address className="not-italic text-gray-600">
                 {formData.deliverySalutation} {formData.deliveryFirstName} {formData.deliveryLastName}<br />
-                {formData.deliveryStreet}<br />
+                {formData.deliveryStreet} {formData.deliveryHouseNumber}<br />
                 {formData.deliveryZip} {formData.deliveryCity}
+                {formData.deliveryCountry && formData.deliveryCountry !== 'DE' && <><br />{formData.deliveryCountry}</>}
               </address>
             )}
           </div>
         </div>
 
-        {formData.stationNotes && (
+        {(formData.packstationNumber || formData.postNumber || formData.deliveryNotes) && (
           <div className="mt-4 pt-4 border-t">
-            <h4 className="font-semibold text-[#38362d] mb-2">Zusätzliche Hinweise</h4>
-            <p className="text-gray-600">{formData.stationNotes}</p>
+            <h4 className="font-semibold text-[#38362d] mb-2">Lieferhinweise</h4>
+            {formData.packstationNumber && <p className="text-gray-600">Packstation: {formData.packstationNumber}</p>}
+            {formData.postNumber && <p className="text-gray-600">Postnummer: {formData.postNumber}</p>}
+            {formData.deliveryNotes && <p className="text-gray-600">{formData.deliveryNotes}</p>}
           </div>
         )}
       </Card>
@@ -93,7 +98,8 @@ export function SummaryStep({ watch }: SummaryStepProps) {
                   sole: item.sole as SoleType,
                   edgeRubber: item.edgeRubber || 'NO',
                   closure: item.closure || false,
-                  hasAdditionalWork: !!item.additionalWork,
+                  disinfection: item.disinfection || false,
+                  trustProfessionals: item.trustProfessionals || false,
                 }) : 0;
 
                 return (

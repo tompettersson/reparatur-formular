@@ -12,7 +12,7 @@ export type SoleType =
 
 export type EdgeRubberOption = 'YES' | 'NO' | 'DISCRETION';
 
-// Sohlen-Preise
+// Sohlen-Preise (Stealth ALT entfernt laut Feedback)
 export const SOLE_PRICES: Record<SoleType, { price: number; thickness: string; label: string }> = {
   vibram_xs_grip: { price: 32, thickness: '4mm', label: 'Vibram XS Grip' },
   vibram_xs_grip_2: { price: 32, thickness: '4mm', label: 'Vibram XS Grip 2' },
@@ -27,8 +27,8 @@ export const SOLE_PRICES: Record<SoleType, { price: number; thickness: string; l
 // Zusatzleistungen
 export const ADDITIONAL_PRICES = {
   edgeRubber: 19, // Randgummi
-  closure: 20, // Fast Lacing (La Sportiva)
-  additionalWork: 3, // Zusatzarbeiten (Desinfektion etc.)
+  closure: 20, // Fast Lacing / Verschluss (Paarpreis!)
+  disinfection: 3, // NEU: Desinfektion pro Paar
 };
 
 // Versandkosten (nur zur Info-Anzeige)
@@ -57,25 +57,45 @@ export const MANUFACTURERS = [
 
 export type Manufacturer = typeof MANUFACTURERS[number];
 
-// Schuhgrößen
-export const SHOE_SIZES = Array.from({ length: 27 }, (_, i) => (24 + i).toString());
+// Schuhgrößen mit halben Größen (24, 24.5, 25, ... 50)
+export const SHOE_SIZES = Array.from({ length: 53 }, (_, i) => {
+  const size = 24 + i * 0.5;
+  return size % 1 === 0 ? size.toString() : size.toFixed(1);
+});
+
+// Anzahl-Optionen (0.5 = Einzelschuh, 1 = Paar, etc.)
+export const QUANTITY_OPTIONS = [
+  { value: '0.5', label: '0,5 (Einzelschuh)' },
+  { value: '1', label: '1 (Paar)' },
+  { value: '1.5', label: '1,5' },
+  { value: '2', label: '2 (Paare)' },
+  { value: '2.5', label: '2,5' },
+  { value: '3', label: '3 (Paare)' },
+  { value: '3.5', label: '3,5' },
+  { value: '4', label: '4 (Paare)' },
+  { value: '4.5', label: '4,5' },
+  { value: '5', label: '5 (Paare)' },
+];
 
 // Preisberechnung für eine Position
 export interface OrderItemInput {
   quantity: number;
-  sole: SoleType;
+  sole: SoleType | string;
   edgeRubber: EdgeRubberOption;
   closure: boolean;
-  hasAdditionalWork: boolean;
+  disinfection: boolean; // NEU
+  trustProfessionals: boolean; // NEU - beeinflusst nur Validierung, nicht Preis
 }
 
 export function calculateItemPrice(item: OrderItemInput): number {
   let price = 0;
 
-  // Grundpreis der Sohle
-  const soleInfo = SOLE_PRICES[item.sole];
-  if (soleInfo) {
-    price += soleInfo.price;
+  // Grundpreis der Sohle (nur wenn ausgewählt)
+  if (item.sole) {
+    const soleInfo = SOLE_PRICES[item.sole as SoleType];
+    if (soleInfo) {
+      price += soleInfo.price;
+    }
   }
 
   // Randgummi (nur wenn JA)
@@ -83,17 +103,17 @@ export function calculateItemPrice(item: OrderItemInput): number {
     price += ADDITIONAL_PRICES.edgeRubber;
   }
 
-  // Verschluss (Fast Lacing)
+  // Verschluss (Paarpreis)
   if (item.closure) {
     price += ADDITIONAL_PRICES.closure;
   }
 
-  // Zusatzarbeiten
-  if (item.hasAdditionalWork) {
-    price += ADDITIONAL_PRICES.additionalWork;
+  // NEU: Desinfektion
+  if (item.disinfection) {
+    price += ADDITIONAL_PRICES.disinfection;
   }
 
-  // Multipliziert mit Anzahl
+  // Multipliziert mit Anzahl (0.5 = halber Preis für Einzelschuh)
   return price * item.quantity;
 }
 

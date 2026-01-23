@@ -43,12 +43,17 @@ export default function OrderWizardPage() {
       firstName: '',
       lastName: '',
       street: '',
+      houseNumber: '',
       zip: '',
       city: '',
+      country: 'DE',
       phone: '',
       email: '',
       deliverySame: true,
-      stationNotes: '',
+      deliveryCountry: 'DE',
+      packstationNumber: '',
+      postNumber: '',
+      deliveryNotes: '',
       gdprAccepted: false,
       agbAccepted: false,
       newsletter: false,
@@ -62,6 +67,8 @@ export default function OrderWizardPage() {
           sole: '',
           edgeRubber: 'DISCRETION',
           closure: false,
+          disinfection: false,
+          trustProfessionals: false,
           additionalWork: '',
           internalNotes: '',
         },
@@ -78,8 +85,8 @@ export default function OrderWizardPage() {
 
     if (currentStep === 1) {
       isValid = await trigger([
-        'salutation', 'firstName', 'lastName', 'street', 'zip', 'city', 'phone', 'email',
-        'deliverySame', 'gdprAccepted', 'agbAccepted'
+        'salutation', 'firstName', 'lastName', 'street', 'houseNumber', 'zip', 'city', 'country',
+        'phone', 'email', 'deliverySame', 'gdprAccepted', 'agbAccepted'
       ]);
     } else if (currentStep === 2) {
       isValid = await trigger(['items']);
@@ -132,27 +139,51 @@ export default function OrderWizardPage() {
               </div>
             </div>
 
-            {/* Help link */}
-            <a
-              href="mailto:info@kletterschuhe.de"
-              className="flex items-center gap-2 text-sm text-[#78716c] hover:text-[#ef6a27] transition-colors"
-            >
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+            {/* Shop + Help links */}
+            <div className="flex items-center gap-4">
+              <a
+                href="https://www.kletterschuhe.de"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hidden sm:flex items-center gap-2 px-4 py-2 text-sm font-medium text-[#38362d] border-2 border-[#e7e5e4] rounded-full hover:border-[#ef6a27] hover:text-[#ef6a27] transition-colors"
               >
-                <circle cx="12" cy="12" r="10" />
-                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-                <path d="M12 17h.01" />
-              </svg>
-              <span className="hidden sm:inline">Hilfe</span>
-            </a>
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+                  <line x1="3" y1="6" x2="21" y2="6" />
+                  <path d="M16 10a4 4 0 0 1-8 0" />
+                </svg>
+                Shop
+              </a>
+              <a
+                href="mailto:info@kletterschuhe.de"
+                className="flex items-center gap-2 text-sm text-[#78716c] hover:text-[#ef6a27] transition-colors"
+              >
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                  <path d="M12 17h.01" />
+                </svg>
+                <span className="hidden sm:inline">Hilfe</span>
+              </a>
+            </div>
           </div>
         </div>
       </header>
@@ -260,13 +291,28 @@ export default function OrderWizardPage() {
               &copy; {new Date().getFullYear()} kletterschuhe.de
             </p>
             <div className="flex items-center gap-6 text-sm text-[#78716c]">
-              <a href="#" className="hover:text-[#ef6a27] transition-colors">
+              <a
+                href="https://www.kletterschuhe.de/impressum"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-[#ef6a27] transition-colors"
+              >
                 Impressum
               </a>
-              <a href="#" className="hover:text-[#ef6a27] transition-colors">
+              <a
+                href="https://www.kletterschuhe.de/datenschutz"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-[#ef6a27] transition-colors"
+              >
                 Datenschutz
               </a>
-              <a href="#" className="hover:text-[#ef6a27] transition-colors">
+              <a
+                href="https://www.kletterschuhe.de/agb"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-[#ef6a27] transition-colors"
+              >
                 AGB
               </a>
             </div>

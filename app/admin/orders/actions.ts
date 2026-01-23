@@ -132,8 +132,10 @@ const customerUpdateSchema = z.object({
   firstName: z.string(),
   lastName: z.string(),
   street: z.string(),
+  houseNumber: z.string(),
   zip: z.string(),
   city: z.string(),
+  country: z.string(),
   phone: z.string(),
   email: z.string().email(),
   deliverySame: z.boolean(),
@@ -141,14 +143,18 @@ const customerUpdateSchema = z.object({
   deliveryFirstName: z.string().optional().nullable(),
   deliveryLastName: z.string().optional().nullable(),
   deliveryStreet: z.string().optional().nullable(),
+  deliveryHouseNumber: z.string().optional().nullable(),
   deliveryZip: z.string().optional().nullable(),
   deliveryCity: z.string().optional().nullable(),
-  stationNotes: z.string().optional().nullable(),
+  deliveryCountry: z.string().optional().nullable(),
+  packstationNumber: z.string().optional().nullable(),
+  postNumber: z.string().optional().nullable(),
+  deliveryNotes: z.string().optional().nullable(),
 });
 
 const itemUpdateSchema = z.object({
   id: z.string(),
-  quantity: z.number().min(1).max(10),
+  quantity: z.number().min(0.5).max(10),
   manufacturer: z.string(),
   model: z.string(),
   color: z.string().optional().nullable(),
@@ -156,6 +162,8 @@ const itemUpdateSchema = z.object({
   sole: z.string(),
   edgeRubber: z.nativeEnum(EdgeRubber),
   closure: z.boolean(),
+  disinfection: z.boolean(),
+  trustProfessionals: z.boolean(),
   additionalWork: z.string().optional().nullable(),
   internalNotes: z.string().optional().nullable(),
   calculatedPrice: z.number(),
@@ -206,9 +214,10 @@ export async function updateOrder(
 
     // Compare customer fields
     const customerFields = [
-      'salutation', 'firstName', 'lastName', 'street', 'zip', 'city',
+      'salutation', 'firstName', 'lastName', 'street', 'houseNumber', 'zip', 'city', 'country',
       'phone', 'email', 'deliverySame', 'deliverySalutation', 'deliveryFirstName',
-      'deliveryLastName', 'deliveryStreet', 'deliveryZip', 'deliveryCity', 'stationNotes'
+      'deliveryLastName', 'deliveryStreet', 'deliveryHouseNumber', 'deliveryZip', 'deliveryCity',
+      'deliveryCountry', 'packstationNumber', 'postNumber', 'deliveryNotes'
     ] as const;
 
     for (const field of customerFields) {
@@ -277,6 +286,8 @@ export async function updateOrder(
             sole: item.sole,
             edgeRubber: item.edgeRubber,
             closure: item.closure,
+            disinfection: item.disinfection,
+            trustProfessionals: item.trustProfessionals,
             additionalWork: item.additionalWork,
             internalNotes: item.internalNotes,
             calculatedPrice: item.calculatedPrice,

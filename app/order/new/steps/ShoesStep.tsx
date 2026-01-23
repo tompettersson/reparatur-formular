@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 import { UseFormRegister, FieldErrors, UseFormWatch, Control, useFieldArray } from 'react-hook-form';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
@@ -9,15 +9,22 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Tooltip } from '@/components/ui/Tooltip';
 import { ShoesFormData, OrderItemFormData } from '@/lib/validation';
-import { SOLE_PRICES, MANUFACTURERS, SHOE_SIZES, calculateItemPrice, formatPrice, SoleType } from '@/lib/pricing';
+import {
+  SOLE_PRICES,
+  MANUFACTURERS,
+  SHOE_SIZES,
+  QUANTITY_OPTIONS,
+  ADDITIONAL_PRICES,
+  calculateItemPrice,
+  formatPrice,
+  SoleType,
+} from '@/lib/pricing';
 import { TOOLTIPS } from '@/lib/tooltips';
 import { ProductSuggestions } from '@/components/ProductSuggestions';
 
 // Helper component to render tooltip content with simple formatting
 function TooltipContent({ title, content }: { title: string; content: string }) {
-  // Process content safely - split into segments and render as React elements
   const processLine = (line: string, key: number): ReactNode => {
-    // Split by bold markers
     const parts = line.split(/(\*\*.*?\*\*)/g);
     return parts.map((part, i) => {
       if (part.startsWith('**') && part.endsWith('**')) {
@@ -49,6 +56,74 @@ function TooltipContent({ title, content }: { title: string; content: string }) 
   );
 }
 
+// FAQ Accordion Component
+function FAQAccordion() {
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  const faqs = [
+    {
+      question: 'Alle wichtigen Infos zum Versand',
+      answer: `Schicken Sie Ihre Schuhe gut verpackt an unsere Adresse. Nach Eingang prüfen wir den Zustand und melden uns bei Fragen. Die Reparatur dauert ca. 2-3 Wochen. Der Rückversand erfolgt per DHL.`,
+    },
+    {
+      question: 'Was auswählen wenn ich keine Ahnung habe?',
+      answer: `Kein Problem! Aktivieren Sie einfach "Ihr seid die Profis" und wir wählen die beste Option für Ihren Schuh. Wir kontaktieren Sie vor der Reparatur, falls Rückfragen entstehen.`,
+    },
+    {
+      question: 'Welches Gummi für Hallenkletterer?',
+      answer: `Für die Halle empfehlen wir Vibram XS Grip 2 - sehr gute Reibung auf Kunstgriffen. Für Boulder mit viel Volumen ist Stealth C4 eine tolle Alternative mit mehr Dämpfung.`,
+    },
+    {
+      question: 'Lohnt sich Randgummi?',
+      answer: `Randgummi lohnt sich, wenn der originale Rand bereits verschlissen ist oder Sie Ihre Schuhe stark belasten (Risskletterei, Überhänge). Bei leichtem Hallenklettern oft nicht nötig.`,
+    },
+  ];
+
+  return (
+    <Card
+      title="Häufige Fragen"
+      subtitle="Hilfe bei der Auswahl"
+      variant="default"
+    >
+      <div className="divide-y divide-[#e7e5e4]">
+        {faqs.map((faq, index) => (
+          <div key={index} className="py-3">
+            <button
+              type="button"
+              onClick={() => setOpenIndex(openIndex === index ? null : index)}
+              className="w-full flex items-center justify-between text-left gap-4"
+            >
+              <span className="text-sm font-semibold text-[#38362d]">
+                {faq.question}
+              </span>
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className={`flex-shrink-0 text-[#78716c] transition-transform ${
+                  openIndex === index ? 'rotate-180' : ''
+                }`}
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </button>
+            {openIndex === index && (
+              <p className="mt-2 text-sm text-[#78716c] leading-relaxed animate-fade-in">
+                {faq.answer}
+              </p>
+            )}
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
 interface ShoesStepProps {
   register: UseFormRegister<ShoesFormData>;
   errors: FieldErrors<ShoesFormData>;
@@ -65,9 +140,9 @@ export function ShoesStep({ register, errors, watch, control }: ShoesStepProps) 
   const items = watch('items');
 
   // Optionen für Dropdowns
-  const quantityOptions = Array.from({ length: 10 }, (_, i) => ({
-    value: String(i + 1),
-    label: String(i + 1),
+  const quantityOptions = QUANTITY_OPTIONS.map(opt => ({
+    value: opt.value,
+    label: opt.label,
   }));
 
   const manufacturerOptions = MANUFACTURERS.map((m) => ({
@@ -86,20 +161,21 @@ export function ShoesStep({ register, errors, watch, control }: ShoesStepProps) 
   }));
 
   const edgeRubberOptions = [
-    { value: 'YES', label: 'Ja (+19€)' },
+    { value: 'YES', label: `Ja (+${ADDITIONAL_PRICES.edgeRubber}€)` },
     { value: 'NO', label: 'Nein' },
     { value: 'DISCRETION', label: 'Nach Ermessen' },
   ];
 
   // Preis für einzelne Position berechnen
   const calculatePositionPrice = (item: OrderItemFormData): number => {
-    if (!item.sole) return 0;
+    if (!item.sole && !item.trustProfessionals) return 0;
     return calculateItemPrice({
       quantity: Number(item.quantity) || 1,
       sole: item.sole as SoleType,
       edgeRubber: item.edgeRubber || 'NO',
       closure: item.closure || false,
-      hasAdditionalWork: !!item.additionalWork,
+      disinfection: item.disinfection || false,
+      trustProfessionals: item.trustProfessionals || false,
     });
   };
 
@@ -117,6 +193,8 @@ export function ShoesStep({ register, errors, watch, control }: ShoesStepProps) 
       sole: '',
       edgeRubber: 'DISCRETION',
       closure: false,
+      disinfection: false,
+      trustProfessionals: false,
       additionalWork: '',
       internalNotes: '',
     });
@@ -124,33 +202,17 @@ export function ShoesStep({ register, errors, watch, control }: ShoesStepProps) 
 
   return (
     <div className="space-y-6">
-      {/* Info-Videos */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {['Sohlen-Typen erklärt', 'Randgummi - Ja oder Nein?', 'Verschluss-Reparatur', 'Zusatzarbeiten'].map((title, i) => (
-          <Card key={i} className="bg-gray-50">
-            <div className="aspect-video bg-gray-200 rounded-lg flex items-center justify-center">
-              <div className="text-center text-gray-500">
-                <svg className="w-8 h-8 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <p className="text-xs">{title}</p>
-              </div>
-            </div>
-          </Card>
-        ))}
-      </div>
-
       {/* Schuh-Positionen */}
       {fields.map((field, index) => {
         const itemPrice = items?.[index] ? calculatePositionPrice(items[index]) : 0;
+        const trustProfessionals = items?.[index]?.trustProfessionals;
 
         return (
           <Card key={field.id} className="relative">
             {/* Header mit Nummer und Löschen-Button */}
             <div className="flex items-center justify-between mb-4">
               <h4 className="text-lg font-semibold text-[#38362d]">
-                Schuh {index + 1}
+                Schuhpaar {index + 1}
               </h4>
               <div className="flex items-center gap-4">
                 <span className="text-lg font-bold text-[#ef6a27]">
@@ -172,14 +234,30 @@ export function ShoesStep({ register, errors, watch, control }: ShoesStepProps) 
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Anzahl */}
-              <Select
-                label="Anzahl"
-                options={quantityOptions}
-                error={errors.items?.[index]?.quantity?.message}
-                required
-                {...register(`items.${index}.quantity` as const, { valueAsNumber: true })}
-              />
+              {/* Anzahl (Schuhpaar) - NEU: mit 0.5 Option */}
+              <div>
+                <div className="flex items-center gap-1.5 mb-2">
+                  <label className="text-sm font-semibold text-[#38362d]" style={{ fontFamily: 'var(--font-display)' }}>
+                    Schuhpaar<span className="text-[#ef6a27] ml-0.5">*</span>
+                  </label>
+                  <Tooltip
+                    content={
+                      <TooltipContent
+                        title="Schuhpaar-Auswahl"
+                        content="**1 Paar** = beide Schuhe zusammen\n**0,5 (Einzelschuh)** = nur ein Schuh (z.B. bei Verlust oder unterschiedlichem Verschleiß)"
+                      />
+                    }
+                    position="top"
+                    trigger="click"
+                    maxWidth={280}
+                  />
+                </div>
+                <Select
+                  options={quantityOptions}
+                  error={errors.items?.[index]?.quantity?.message}
+                  {...register(`items.${index}.quantity` as const, { valueAsNumber: true })}
+                />
+              </div>
 
               {/* Hersteller */}
               <Select
@@ -191,9 +269,9 @@ export function ShoesStep({ register, errors, watch, control }: ShoesStepProps) 
                 {...register(`items.${index}.manufacturer` as const)}
               />
 
-              {/* Größe */}
+              {/* Größe - NEU: halbe Größen */}
               <Select
-                label="Größe"
+                label="Größe (EU)"
                 options={sizeOptions}
                 placeholder="Bitte wählen..."
                 error={errors.items?.[index]?.size?.message}
@@ -224,52 +302,76 @@ export function ShoesStep({ register, errors, watch, control }: ShoesStepProps) 
                 {...register(`items.${index}.color` as const)}
               />
 
-              {/* Sohle */}
-              <div>
-                <div className="flex items-center gap-1.5 mb-2">
-                  <label className="text-sm font-semibold text-[#38362d]" style={{ fontFamily: 'var(--font-display)' }}>
-                    Gummi / Bauteil<span className="text-[#ef6a27] ml-0.5">*</span>
-                  </label>
-                  <Tooltip
-                    content={<TooltipContent title={TOOLTIPS.sole.title} content={TOOLTIPS.sole.content} />}
-                    position="top"
-                    trigger="click"
-                    maxWidth={320}
-                  />
-                </div>
-                <Select
-                  options={soleOptions}
-                  placeholder="Bitte wählen..."
-                  error={errors.items?.[index]?.sole?.message}
-                  {...register(`items.${index}.sole` as const)}
-                />
-              </div>
+              {/* Platzhalter für 3-Spalten-Grid */}
+              <div className="hidden md:block" />
+            </div>
 
-              {/* Randgummi */}
-              <div>
-                <div className="flex items-center gap-1.5 mb-2">
-                  <label className="text-sm font-semibold text-[#38362d]" style={{ fontFamily: 'var(--font-display)' }}>
-                    Randgummi<span className="text-[#ef6a27] ml-0.5">*</span>
-                  </label>
-                  <Tooltip
-                    content={<TooltipContent title={TOOLTIPS.edgeRubber.title} content={TOOLTIPS.edgeRubber.content} />}
-                    position="top"
-                    trigger="click"
-                    maxWidth={300}
-                  />
-                </div>
-                <Select
-                  options={edgeRubberOptions}
-                  error={errors.items?.[index]?.edgeRubber?.message}
-                  {...register(`items.${index}.edgeRubber` as const)}
-                />
-              </div>
+            {/* "Profis machen lassen" Checkbox - NEU */}
+            <div className="mt-6 p-4 bg-[#f0fdf4] rounded-lg border border-[#22c55e]/20">
+              <Checkbox
+                label="Ihr seid die Profis - macht was für den Schuh am sinnvollsten ist!"
+                description="Wir wählen die beste Kombination aus Gummi und Randgummi für Ihren Schuh. Wir kontaktieren Sie vor der Reparatur."
+                {...register(`items.${index}.trustProfessionals` as const)}
+              />
+            </div>
 
-              {/* Verschluss */}
-              <div className="flex items-end pb-2">
+            {/* Reparatur-Optionen (nur wenn nicht "Profis machen lassen") */}
+            {!trustProfessionals && (
+              <div className="mt-6 pt-6 border-t border-[#e7e5e4]">
+                <h5 className="text-sm font-semibold text-[#38362d] mb-4">Reparatur-Optionen</h5>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Sohle/Bauteil */}
+                  <div>
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <label className="text-sm font-semibold text-[#38362d]" style={{ fontFamily: 'var(--font-display)' }}>
+                        Gummi / Bauteil<span className="text-[#ef6a27] ml-0.5">*</span>
+                      </label>
+                      <Tooltip
+                        content={<TooltipContent title={TOOLTIPS.sole.title} content={TOOLTIPS.sole.content} />}
+                        position="top"
+                        trigger="click"
+                        maxWidth={320}
+                      />
+                    </div>
+                    <Select
+                      options={soleOptions}
+                      placeholder="Bitte wählen..."
+                      error={errors.items?.[index]?.sole?.message}
+                      {...register(`items.${index}.sole` as const)}
+                    />
+                  </div>
+
+                  {/* Randgummi */}
+                  <div>
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <label className="text-sm font-semibold text-[#38362d]" style={{ fontFamily: 'var(--font-display)' }}>
+                        Randgummi<span className="text-[#ef6a27] ml-0.5">*</span>
+                      </label>
+                      <Tooltip
+                        content={<TooltipContent title={TOOLTIPS.edgeRubber.title} content={TOOLTIPS.edgeRubber.content} />}
+                        position="top"
+                        trigger="click"
+                        maxWidth={300}
+                      />
+                    </div>
+                    <Select
+                      options={edgeRubberOptions}
+                      error={errors.items?.[index]?.edgeRubber?.message}
+                      {...register(`items.${index}.edgeRubber` as const)}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Zusatzoptionen */}
+            <div className="mt-6 pt-6 border-t border-[#e7e5e4]">
+              <h5 className="text-sm font-semibold text-[#38362d] mb-4">Zusatzoptionen</h5>
+              <div className="space-y-3">
+                {/* Verschluss - mit Paarpreis-Hinweis */}
                 <div className="flex items-center gap-2">
                   <Checkbox
-                    label="Verschluss reparieren (+20€)"
+                    label={`Verschluss reparieren (+${ADDITIONAL_PRICES.closure}€ Paarpreis)`}
                     {...register(`items.${index}.closure` as const)}
                   />
                   <Tooltip
@@ -279,14 +381,23 @@ export function ShoesStep({ register, errors, watch, control }: ShoesStepProps) 
                     maxWidth={300}
                   />
                 </div>
+
+                {/* Desinfektion - NEU als eigene Option */}
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    label={`Desinfektion (+${ADDITIONAL_PRICES.disinfection}€ pro Paar)`}
+                    description="Antibakterielle Behandlung gegen Gerüche und Bakterien"
+                    {...register(`items.${index}.disinfection` as const)}
+                  />
+                </div>
               </div>
             </div>
 
-            {/* Zusatzarbeiten */}
+            {/* Zusatzarbeiten (Freitext) */}
             <div className="mt-4">
               <div className="flex items-center gap-1.5 mb-1">
                 <label className="text-sm font-semibold text-[#38362d]" style={{ fontFamily: 'var(--font-display)' }}>
-                  Zusatzarbeiten (optional, +3€)
+                  Weitere Zusatzarbeiten (optional)
                 </label>
                 <Tooltip
                   content={<TooltipContent title={TOOLTIPS.additionalWork.title} content={TOOLTIPS.additionalWork.content} />}
@@ -298,7 +409,7 @@ export function ShoesStep({ register, errors, watch, control }: ShoesStepProps) 
               <textarea
                 className="w-full px-3 py-2 rounded-md border border-gray-300 focus:border-[#ef6a27] focus:ring-2 focus:ring-[#ef6a27]/20 focus:outline-none resize-none"
                 rows={2}
-                placeholder="z.B. Desinfektion, Reinigung..."
+                placeholder="z.B. Fersenschlaufe nähen, Zehenkappe verstärken..."
                 {...register(`items.${index}.additionalWork` as const)}
               />
             </div>
@@ -321,7 +432,7 @@ export function ShoesStep({ register, errors, watch, control }: ShoesStepProps) 
 
       {/* Weiteren Schuh hinzufügen */}
       <Button type="button" variant="outline" onClick={addItem} className="w-full">
-        + Weiteren Schuh hinzufügen
+        + Weiteres Schuhpaar hinzufügen
       </Button>
 
       {/* Gesamtsumme */}
@@ -331,9 +442,13 @@ export function ShoesStep({ register, errors, watch, control }: ShoesStepProps) 
           <span className="text-2xl font-bold text-[#ef6a27]">{formatPrice(totalPrice)}</span>
         </div>
         <p className="text-sm text-gray-500 mt-2">
-          * Endgültiger Preis kann je nach tatsächlichem Reparaturaufwand abweichen
+          * Endgültiger Preis kann je nach tatsächlichem Reparaturaufwand abweichen.
+          Versandkosten kommen hinzu.
         </p>
       </Card>
+
+      {/* FAQ Accordion */}
+      <FAQAccordion />
     </div>
   );
 }

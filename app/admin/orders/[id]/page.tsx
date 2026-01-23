@@ -131,8 +131,11 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
               </div>
               <div>
                 <p className="text-sm text-gray-500">Adresse</p>
-                <p>{order.street}</p>
+                <p>{order.street} {order.houseNumber}</p>
                 <p>{order.zip} {order.city}</p>
+                {order.country && order.country !== 'DE' && (
+                  <p>{order.country}</p>
+                )}
               </div>
               <div>
                 <p className="text-sm text-gray-500">Kontakt</p>
@@ -145,14 +148,25 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
                   <p className="font-semibold">
                     {order.deliverySalutation} {order.deliveryFirstName} {order.deliveryLastName}
                   </p>
-                  <p>{order.deliveryStreet}</p>
+                  <p>{order.deliveryStreet} {order.deliveryHouseNumber}</p>
                   <p>{order.deliveryZip} {order.deliveryCity}</p>
+                  {order.deliveryCountry && order.deliveryCountry !== 'DE' && (
+                    <p>{order.deliveryCountry}</p>
+                  )}
                 </div>
               )}
-              {order.stationNotes && (
+              {(order.packstationNumber || order.postNumber || order.deliveryNotes) && (
                 <div className="pt-4 border-t">
                   <p className="text-sm text-gray-500">Lieferhinweise</p>
-                  <p className="text-gray-700">{order.stationNotes}</p>
+                  {order.packstationNumber && (
+                    <p className="text-gray-700">Packstation: {order.packstationNumber}</p>
+                  )}
+                  {order.postNumber && (
+                    <p className="text-gray-700">Postnummer: {order.postNumber}</p>
+                  )}
+                  {order.deliveryNotes && (
+                    <p className="text-gray-700">{order.deliveryNotes}</p>
+                  )}
                 </div>
               )}
             </div>
@@ -169,7 +183,7 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
                   <div className="flex items-start justify-between">
                     <div>
                       <p className="font-semibold text-lg">
-                        {item.quantity}x {item.manufacturer} {item.model}
+                        {Number(item.quantity)}x {item.manufacturer} {item.model}
                         {item.color && (
                           <span className="text-gray-500 font-normal"> ({item.color})</span>
                         )}
@@ -197,6 +211,14 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
                     <div>
                       <p className="text-xs text-gray-500">Verschluss</p>
                       <p className="font-semibold text-sm">{item.closure ? 'Ja' : 'Nein'}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Desinfektion</p>
+                      <p className="font-semibold text-sm">{item.disinfection ? 'Ja' : 'Nein'}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Profis machen lassen</p>
+                      <p className="font-semibold text-sm">{item.trustProfessionals ? 'Ja' : 'Nein'}</p>
                     </div>
                   </div>
 

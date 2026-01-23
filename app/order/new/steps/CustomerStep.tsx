@@ -1,13 +1,14 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { UseFormRegister, FieldErrors, UseFormWatch, UseFormSetValue } from 'react-hook-form';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Checkbox } from '@/components/ui/Checkbox';
 import { Card } from '@/components/ui/Card';
-import { CustomerFormData } from '@/lib/validation';
+import { CustomerFormData, SUPPORTED_COUNTRIES } from '@/lib/validation';
 import { findCustomerByEmail, CustomerData } from '../actions';
+import { TrustBadges } from '@/components/TrustBadges';
 
 interface CustomerStepProps {
   register: UseFormRegister<CustomerFormData>;
@@ -57,13 +58,11 @@ const TruckIcon = () => (
   </svg>
 );
 
-const FileTextIcon = () => (
+const PackageIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-    <polyline points="14 2 14 8 20 8" />
-    <line x1="16" y1="13" x2="8" y2="13" />
-    <line x1="16" y1="17" x2="8" y2="17" />
-    <polyline points="10 9 9 9 8 9" />
+    <path d="M16.5 9.4l-9-5.19M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+    <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+    <line x1="12" y1="22.08" x2="12" y2="12" />
   </svg>
 );
 
@@ -73,7 +72,6 @@ const ShieldIcon = () => (
   </svg>
 );
 
-// Check mark icon for autofill success
 const CheckCircleIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
@@ -81,7 +79,6 @@ const CheckCircleIcon = () => (
   </svg>
 );
 
-// Loading spinner icon
 const LoadingIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="animate-spin">
     <circle cx="12" cy="12" r="10" strokeOpacity="0.25" />
@@ -89,14 +86,23 @@ const LoadingIcon = () => (
   </svg>
 );
 
+const ExternalLinkIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+    <polyline points="15 3 21 3 21 9" />
+    <line x1="10" y1="14" x2="21" y2="3" />
+  </svg>
+);
+
 export function CustomerStep({ register, errors, watch, setValue }: CustomerStepProps) {
   const deliverySame = watch('deliverySame');
   const email = watch('email');
+  const packstationNumber = watch('packstationNumber');
 
   // Autofill state
   const [isSearching, setIsSearching] = useState(false);
   const [autofillMessage, setAutofillMessage] = useState<string | null>(null);
-  const hasAutofilledRef = useRef<string | null>(null); // Track which email was autofilled
+  const hasAutofilledRef = useRef<string | null>(null);
 
   // Debounce email input
   const debouncedEmail = useDebounce(email, 500);
@@ -104,12 +110,10 @@ export function CustomerStep({ register, errors, watch, setValue }: CustomerStep
   // Email autofill effect
   useEffect(() => {
     const performAutofill = async () => {
-      // Don't search if email is too short or same as already autofilled
       if (!debouncedEmail || debouncedEmail.length < 5 || !debouncedEmail.includes('@')) {
         return;
       }
 
-      // Don't search again for the same email that was already autofilled
       if (hasAutofilledRef.current === debouncedEmail) {
         return;
       }
@@ -121,16 +125,16 @@ export function CustomerStep({ register, errors, watch, setValue }: CustomerStep
         const customerData = await findCustomerByEmail(debouncedEmail);
 
         if (customerData.found) {
-          // Fill form fields
           if (customerData.salutation) setValue('salutation', customerData.salutation as 'Herr' | 'Frau' | 'Divers');
           if (customerData.firstName) setValue('firstName', customerData.firstName);
           if (customerData.lastName) setValue('lastName', customerData.lastName);
           if (customerData.street) setValue('street', customerData.street);
+          if (customerData.houseNumber) setValue('houseNumber', customerData.houseNumber);
           if (customerData.zip) setValue('zip', customerData.zip);
           if (customerData.city) setValue('city', customerData.city);
+          if (customerData.country) setValue('country', customerData.country);
           if (customerData.phone) setValue('phone', customerData.phone);
 
-          // Delivery address
           if (customerData.deliverySame !== undefined) {
             setValue('deliverySame', customerData.deliverySame);
           }
@@ -139,15 +143,14 @@ export function CustomerStep({ register, errors, watch, setValue }: CustomerStep
             if (customerData.deliveryFirstName) setValue('deliveryFirstName', customerData.deliveryFirstName);
             if (customerData.deliveryLastName) setValue('deliveryLastName', customerData.deliveryLastName);
             if (customerData.deliveryStreet) setValue('deliveryStreet', customerData.deliveryStreet);
+            if (customerData.deliveryHouseNumber) setValue('deliveryHouseNumber', customerData.deliveryHouseNumber);
             if (customerData.deliveryZip) setValue('deliveryZip', customerData.deliveryZip);
             if (customerData.deliveryCity) setValue('deliveryCity', customerData.deliveryCity);
+            if (customerData.deliveryCountry) setValue('deliveryCountry', customerData.deliveryCountry);
           }
 
-          // Mark as autofilled and show message
           hasAutofilledRef.current = debouncedEmail;
           setAutofillMessage(`Willkommen zurück, ${customerData.firstName}! Daten wurden ausgefüllt.`);
-
-          // Clear message after 5 seconds
           setTimeout(() => setAutofillMessage(null), 5000);
         }
       } catch (error) {
@@ -165,6 +168,11 @@ export function CustomerStep({ register, errors, watch, setValue }: CustomerStep
     { value: 'Frau', label: 'Frau' },
     { value: 'Divers', label: 'Divers' },
   ];
+
+  const countryOptions = SUPPORTED_COUNTRIES.map(c => ({
+    value: c.code,
+    label: c.label,
+  }));
 
   return (
     <div className="space-y-6">
@@ -201,7 +209,7 @@ export function CustomerStep({ register, errors, watch, setValue }: CustomerStep
             required
             {...register('salutation')}
           />
-          <div className="hidden md:block" /> {/* Spacer */}
+          <div className="hidden md:block" />
 
           <Input
             label="Vorname"
@@ -218,14 +226,26 @@ export function CustomerStep({ register, errors, watch, setValue }: CustomerStep
             {...register('lastName')}
           />
 
-          <div className="md:col-span-2">
-            <Input
-              label="Straße und Hausnummer"
-              placeholder="Musterstraße 1"
-              error={errors.street?.message}
-              required
-              {...register('street')}
-            />
+          {/* Straße und Hausnummer GETRENNT */}
+          <div className="md:col-span-2 grid grid-cols-3 gap-4">
+            <div className="col-span-2">
+              <Input
+                label="Straße"
+                placeholder="Musterstraße"
+                error={errors.street?.message}
+                required
+                {...register('street')}
+              />
+            </div>
+            <div>
+              <Input
+                label="Hausnr."
+                placeholder="1"
+                error={errors.houseNumber?.message}
+                required
+                {...register('houseNumber')}
+              />
+            </div>
           </div>
 
           <Input
@@ -242,6 +262,16 @@ export function CustomerStep({ register, errors, watch, setValue }: CustomerStep
             required
             {...register('city')}
           />
+
+          {/* NEU: Land-Dropdown */}
+          <Select
+            label="Land"
+            options={countryOptions}
+            error={errors.country?.message}
+            required
+            {...register('country')}
+          />
+          <div className="hidden md:block" />
 
           <Input
             label="Telefon"
@@ -262,7 +292,6 @@ export function CustomerStep({ register, errors, watch, setValue }: CustomerStep
               required
               {...register('email')}
             />
-            {/* Loading/Autofill indicator */}
             {isSearching && (
               <div className="absolute right-3 top-[38px] text-[#78716c]">
                 <LoadingIcon />
@@ -325,17 +354,28 @@ export function CustomerStep({ register, errors, watch, setValue }: CustomerStep
               {...register('deliveryLastName')}
             />
 
-            <div className="md:col-span-2">
-              <Input
-                label="Straße und Hausnummer"
-                placeholder="Musterstraße 1"
-                {...register('deliveryStreet')}
-              />
+            {/* Straße und Hausnummer GETRENNT */}
+            <div className="md:col-span-2 grid grid-cols-3 gap-4">
+              <div className="col-span-2">
+                <Input
+                  label="Straße"
+                  placeholder="Musterstraße"
+                  {...register('deliveryStreet')}
+                />
+              </div>
+              <div>
+                <Input
+                  label="Hausnr."
+                  placeholder="1"
+                  {...register('deliveryHouseNumber')}
+                />
+              </div>
             </div>
 
             <Input
               label="PLZ"
               placeholder="12345"
+              error={errors.deliveryZip?.message}
               {...register('deliveryZip')}
             />
             <Input
@@ -343,38 +383,73 @@ export function CustomerStep({ register, errors, watch, setValue }: CustomerStep
               placeholder="Musterstadt"
               {...register('deliveryCity')}
             />
+
+            {/* Land für Lieferadresse */}
+            <Select
+              label="Land"
+              options={countryOptions}
+              {...register('deliveryCountry')}
+            />
           </div>
         </Card>
       )}
 
-      {/* Zusätzliche Hinweise */}
+      {/* Packstation/DHL (separate Felder) */}
       <Card
-        title="Zusätzliche Hinweise"
-        subtitle="Optional"
-        icon={<FileTextIcon />}
+        title="DHL Packstation / Lieferhinweise"
+        subtitle="Optional - falls Sie an eine Packstation liefern möchten"
+        icon={<PackageIcon />}
       >
-        <div>
-          <label
-            htmlFor="stationNotes"
-            className="block text-sm font-semibold text-[#38362d] mb-2"
-            style={{ fontFamily: 'var(--font-display)' }}
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Input
+              label="Packstation-Nummer"
+              placeholder="z.B. 123"
+              hint="Die 3-stellige Nummer Ihrer Packstation"
+              {...register('packstationNumber')}
+            />
+            <Input
+              label="DHL Postnummer"
+              placeholder="z.B. 12345678"
+              hint="Ihre persönliche DHL Kundennummer"
+              {...register('postNumber')}
+            />
+          </div>
+
+          {/* DHL Standort-Finder Link */}
+          <a
+            href="https://www.dhl.de/de/privatkunden/dhl-standorte-finden.html"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-sm text-[#3ca1ac] hover:text-[#2d8a94] transition-colors font-medium"
           >
-            Poststation / Packstation / Lieferhinweise
-          </label>
-          <textarea
-            id="stationNotes"
-            className="
-              w-full px-4 py-3 rounded-[10px]
-              bg-white text-[#38362d] placeholder-[#a8a29e]
-              border-2 border-[#e7e5e4]
-              transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]
-              hover:border-[#d6d3d1] focus:border-[#ef6a27] focus:ring-4 focus:ring-[#ef6a27]/10
-              focus:outline-none resize-none
-            "
-            rows={3}
-            placeholder="z.B. Packstation 123, Postnummer 12345678"
-            {...register('stationNotes')}
-          />
+            <ExternalLinkIcon />
+            DHL Packstation in Ihrer Nähe finden
+          </a>
+
+          <div>
+            <label
+              htmlFor="deliveryNotes"
+              className="block text-sm font-semibold text-[#38362d] mb-2"
+              style={{ fontFamily: 'var(--font-display)' }}
+            >
+              Sonstige Lieferhinweise
+            </label>
+            <textarea
+              id="deliveryNotes"
+              className="
+                w-full px-4 py-3 rounded-[10px]
+                bg-white text-[#38362d] placeholder-[#a8a29e]
+                border-2 border-[#e7e5e4]
+                transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]
+                hover:border-[#d6d3d1] focus:border-[#ef6a27] focus:ring-4 focus:ring-[#ef6a27]/10
+                focus:outline-none resize-none
+              "
+              rows={2}
+              placeholder="z.B. Bitte bei Nachbar abgeben, Hintereingang nutzen..."
+              {...register('deliveryNotes')}
+            />
+          </div>
         </div>
       </Card>
 
@@ -387,13 +462,39 @@ export function CustomerStep({ register, errors, watch, setValue }: CustomerStep
       >
         <div className="space-y-2">
           <Checkbox
-            label="Ich habe die Datenschutzerklärung gelesen und akzeptiere diese."
+            label={
+              <>
+                Ich habe die{' '}
+                <a
+                  href="https://www.kletterschuhe.de/datenschutz"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#3ca1ac] hover:underline"
+                >
+                  Datenschutzerklärung
+                </a>{' '}
+                gelesen und akzeptiere diese.
+              </>
+            }
             error={errors.gdprAccepted?.message}
             required
             {...register('gdprAccepted')}
           />
           <Checkbox
-            label="Ich habe die AGB gelesen und akzeptiere diese."
+            label={
+              <>
+                Ich habe die{' '}
+                <a
+                  href="https://www.kletterschuhe.de/agb"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#3ca1ac] hover:underline"
+                >
+                  AGB
+                </a>{' '}
+                gelesen und akzeptiere diese.
+              </>
+            }
             error={errors.agbAccepted?.message}
             required
             {...register('agbAccepted')}
@@ -406,6 +507,9 @@ export function CustomerStep({ register, errors, watch, setValue }: CustomerStep
             />
           </div>
         </div>
+
+        {/* Trust-Badges */}
+        <TrustBadges />
       </Card>
     </div>
   );
