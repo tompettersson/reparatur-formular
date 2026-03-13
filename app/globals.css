@@ -1091,6 +1091,32 @@ input, select, textarea, button {
     border: 1px solid #ddd;
   }
 
+  /* Admin orders list print optimization */
+  nav, header, footer,
+  [class*="AdminHeader"],
+  [class*="StatusFilter"],
+  [class*="OrderSearch"],
+  [class*="PrintButton"] {
+    display: none !important;
+  }
+
+  table {
+    font-size: 10pt;
+  }
+
+  table th, table td {
+    padding: 6px 8px !important;
+  }
+
+  /* Hide action buttons in print */
+  table td:last-child {
+    display: none !important;
+  }
+
+  table th:last-child {
+    display: none !important;
+  }
+
   @page {
     size: A4;
     margin: 15mm;

@@ -60,7 +60,7 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
     }).format(date);
 
   // Check if order can be edited (not completed or cancelled)
-  const canEdit = !['COMPLETED', 'CANCELLED'].includes(order.status);
+  const canEdit = !['COMPLETED', 'CANCELLED', 'RETURNED'].includes(order.status);
 
   return (
     <div className="min-h-screen bg-[#f3f3f3]">

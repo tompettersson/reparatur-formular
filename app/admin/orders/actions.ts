@@ -14,9 +14,11 @@ const STATUS_LABELS: Record<OrderStatus, string> = {
   SUBMITTED: 'Eingereicht',
   RECEIVED: 'Eingetroffen',
   INSPECTED: 'Begutachtet',
+  PAID: 'Bezahlt',
   REPAIRING: 'In Reparatur',
   READY: 'Fertig',
   SHIPPED: 'Versendet',
+  RETURNED: 'Retourniert',
   COMPLETED: 'Abgeschlossen',
   CANCELLED: 'Storniert',
   ON_HOLD: 'Wartend (Rückfrage)',
@@ -98,7 +100,7 @@ export async function updateOrderStatus(
     revalidatePath('/admin/orders');
 
     // Send status update email to customer (for relevant status changes)
-    const emailStatuses: OrderStatus[] = ['RECEIVED', 'INSPECTED', 'REPAIRING', 'READY', 'SHIPPED', 'ON_HOLD'];
+    const emailStatuses: OrderStatus[] = ['RECEIVED', 'INSPECTED', 'PAID', 'REPAIRING', 'READY', 'SHIPPED', 'RETURNED', 'ON_HOLD'];
     if (emailStatuses.includes(newStatus)) {
       const emailData = statusUpdateEmail({
         orderNumber: order.orderNumber,

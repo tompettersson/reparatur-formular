@@ -218,6 +218,10 @@ const STATUS_MESSAGES: Record<string, { title: string; message: string }> = {
     title: 'Begutachtung abgeschlossen',
     message: 'Wir haben Ihre Schuhe begutachtet. Die Reparatur kann beginnen.',
   },
+  PAID: {
+    title: 'Zahlung eingegangen',
+    message: 'Vielen Dank! Wir haben Ihre Zahlung erhalten. Ihre Schuhe gehen jetzt in die Werkstatt.',
+  },
   REPAIRING: {
     title: 'Reparatur gestartet',
     message: 'Ihre Schuhe befinden sich jetzt in der Reparatur.',
@@ -229,6 +233,10 @@ const STATUS_MESSAGES: Record<string, { title: string; message: string }> = {
   SHIPPED: {
     title: 'Ihre Schuhe sind unterwegs!',
     message: 'Wir haben Ihre reparierten Schuhe versandt.',
+  },
+  RETURNED: {
+    title: 'Schuhe retourniert',
+    message: 'Ihre Schuhe wurden retourniert. Bei Fragen stehen wir Ihnen gerne zur Verfügung.',
   },
   ON_HOLD: {
     title: 'Rückfrage zu Ihrem Auftrag',

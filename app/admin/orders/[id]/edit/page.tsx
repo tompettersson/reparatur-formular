@@ -22,7 +22,7 @@ export default async function EditOrderPage({ params }: EditOrderPageProps) {
   }
 
   // Prevent editing completed or cancelled orders
-  if (['COMPLETED', 'CANCELLED'].includes(order.status)) {
+  if (['COMPLETED', 'CANCELLED', 'RETURNED'].includes(order.status)) {
     redirect(`/admin/orders/${id}`);
   }
 

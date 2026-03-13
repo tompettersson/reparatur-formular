@@ -153,9 +153,11 @@ enum OrderStatus {
   SUBMITTED
   RECEIVED      // Schuhe sind eingetroffen
   INSPECTED     // Begutachtet, KVA bestätigt/angepasst
+  PAID          // Bezahlt (Geldeingang bestätigt)
   REPAIRING     // In Reparatur
   READY         // Fertig, wartet auf Versand
   SHIPPED       // Versendet
+  RETURNED      // Retourniert (zurück beim Kunden)
   COMPLETED     // Abgeschlossen (Kunde hat erhalten)
   CANCELLED     // Storniert
   ON_HOLD       // Rückfrage an Kunde

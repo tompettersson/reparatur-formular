@@ -5,43 +5,55 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { AdminHeader } from '../AdminHeader';
 import { OrderSearch } from './OrderSearch';
+import { StatusFilter } from './StatusFilter';
 import { CopyButton } from './CopyButton';
+import { PrintButton } from './PrintButton';
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   DRAFT: { label: 'Entwurf', color: 'bg-gray-100 text-gray-700' },
   SUBMITTED: { label: 'Eingereicht', color: 'bg-blue-100 text-blue-700' },
   RECEIVED: { label: 'Eingetroffen', color: 'bg-indigo-100 text-indigo-700' },
   INSPECTED: { label: 'Begutachtet', color: 'bg-purple-100 text-purple-700' },
+  PAID: { label: 'Bezahlt', color: 'bg-emerald-100 text-emerald-800 ring-1 ring-emerald-300' },
   REPAIRING: { label: 'In Reparatur', color: 'bg-yellow-100 text-yellow-800' },
   READY: { label: 'Fertig', color: 'bg-green-100 text-green-700' },
   SHIPPED: { label: 'Versendet', color: 'bg-teal-100 text-teal-700' },
+  RETURNED: { label: 'Retourniert', color: 'bg-gray-200 text-gray-600' },
   COMPLETED: { label: 'Abgeschlossen', color: 'bg-green-600 text-white' },
   CANCELLED: { label: 'Storniert', color: 'bg-red-100 text-red-700' },
   ON_HOLD: { label: 'Rückfrage', color: 'bg-orange-100 text-orange-700' },
 };
 
 interface AdminOrdersPageProps {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ q?: string; status?: string }>;
 }
 
 export default async function AdminOrdersPage({ searchParams }: AdminOrdersPageProps) {
-  const { q } = await searchParams;
+  const { q, status: statusFilter } = await searchParams;
 
-  // Build where clause based on search query
-  const whereClause = q
-    ? {
-        OR: [
-          // Search by order number (exact or partial)
-          ...(isNaN(Number(q))
-            ? []
-            : [{ orderNumber: { equals: Number(q) } }]),
-          // Search by customer name
-          { firstName: { contains: q, mode: 'insensitive' as const } },
-          { lastName: { contains: q, mode: 'insensitive' as const } },
-          // Search by email
-          { email: { contains: q, mode: 'insensitive' as const } },
-        ],
-      }
+  // Build where clause based on search query and status filter
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const conditions: any[] = [];
+
+  if (q) {
+    conditions.push({
+      OR: [
+        ...(isNaN(Number(q))
+          ? []
+          : [{ orderNumber: { equals: Number(q) } }]),
+        { firstName: { contains: q, mode: 'insensitive' as const } },
+        { lastName: { contains: q, mode: 'insensitive' as const } },
+        { email: { contains: q, mode: 'insensitive' as const } },
+      ],
+    });
+  }
+
+  if (statusFilter && statusFilter in STATUS_LABELS) {
+    conditions.push({ status: statusFilter });
+  }
+
+  const whereClause = conditions.length > 0
+    ? conditions.length === 1 ? conditions[0] : { AND: conditions }
     : {};
 
   const orders = await prisma.order.findMany({
@@ -98,23 +110,34 @@ export default async function AdminOrdersPage({ searchParams }: AdminOrdersPageP
           </Card>
         </div>
 
-        {/* Search */}
+        {/* Search & Filter */}
         <Card title="Aufträge">
-          <div className="mb-6">
+          <div className="mb-4">
             <Suspense fallback={<div className="h-11 bg-gray-100 rounded-lg animate-pulse" />}>
               <OrderSearch />
             </Suspense>
           </div>
 
-          {q && (
+          <div className="mb-4 flex items-center justify-between gap-4">
+            <Suspense fallback={<div className="h-8 bg-gray-100 rounded-lg animate-pulse flex-1" />}>
+              <StatusFilter />
+            </Suspense>
+            {statusFilter && orders.length > 0 && (
+              <PrintButton count={orders.length} statusLabel={STATUS_LABELS[statusFilter]?.label || statusFilter} />
+            )}
+          </div>
+
+          {(q || statusFilter) && (
             <div className="mb-4 text-sm text-gray-500">
-              {orders.length} {orders.length === 1 ? 'Ergebnis' : 'Ergebnisse'} für &quot;{q}&quot;
+              {orders.length} {orders.length === 1 ? 'Ergebnis' : 'Ergebnisse'}
+              {q ? <> für &quot;{q}&quot;</> : null}
+              {statusFilter ? <> mit Status &quot;{STATUS_LABELS[statusFilter]?.label || statusFilter}&quot;</> : null}
             </div>
           )}
 
           {orders.length === 0 ? (
             <p className="text-center text-gray-500 py-8">
-              {q ? 'Keine Aufträge gefunden.' : 'Noch keine Aufträge vorhanden.'}
+              {q || statusFilter ? 'Keine Aufträge gefunden.' : 'Noch keine Aufträge vorhanden.'}
             </p>
           ) : (
             <div className="overflow-x-auto">

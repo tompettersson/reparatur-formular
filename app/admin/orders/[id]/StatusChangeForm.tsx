@@ -19,11 +19,16 @@ const STATUS_CONFIG: Record<OrderStatus, { label: string; color: string; next: O
   RECEIVED: {
     label: 'Eingetroffen',
     color: 'bg-indigo-100 text-indigo-700',
-    next: ['INSPECTED', 'CANCELLED', 'ON_HOLD'],
+    next: ['INSPECTED', 'PAID', 'CANCELLED', 'ON_HOLD'],
   },
   INSPECTED: {
     label: 'Begutachtet',
     color: 'bg-purple-100 text-purple-700',
+    next: ['PAID', 'REPAIRING', 'CANCELLED', 'ON_HOLD'],
+  },
+  PAID: {
+    label: 'Bezahlt',
+    color: 'bg-emerald-100 text-emerald-800 ring-1 ring-emerald-300',
     next: ['REPAIRING', 'CANCELLED', 'ON_HOLD'],
   },
   REPAIRING: {
@@ -39,6 +44,11 @@ const STATUS_CONFIG: Record<OrderStatus, { label: string; color: string; next: O
   SHIPPED: {
     label: 'Versendet',
     color: 'bg-teal-100 text-teal-700',
+    next: ['RETURNED', 'COMPLETED'],
+  },
+  RETURNED: {
+    label: 'Retourniert',
+    color: 'bg-gray-200 text-gray-600',
     next: ['COMPLETED'],
   },
   COMPLETED: {
@@ -54,7 +64,7 @@ const STATUS_CONFIG: Record<OrderStatus, { label: string; color: string; next: O
   ON_HOLD: {
     label: 'Wartend (Rückfrage)',
     color: 'bg-orange-100 text-orange-700',
-    next: ['RECEIVED', 'INSPECTED', 'REPAIRING', 'CANCELLED'],
+    next: ['RECEIVED', 'INSPECTED', 'PAID', 'REPAIRING', 'CANCELLED'],
   },
 };
 
