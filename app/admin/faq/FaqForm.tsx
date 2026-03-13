@@ -22,6 +22,7 @@ export function FaqForm({ faq, onClose }: FaqFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [isActive, setIsActive] = useState(faq?.isActive ?? true);
 
   const handleSubmit = (formData: FormData) => {
     setError(null);
@@ -82,15 +83,12 @@ export function FaqForm({ faq, onClose }: FaqFormProps) {
 
           {faq && (
             <div className="pt-2">
-              <input type="hidden" name="isActive" value={String(faq.isActive)} />
+              <input type="hidden" name="isActive" value={String(isActive)} />
               <Checkbox
                 label="Aktiv"
                 description="Deaktivierte FAQ-Einträge werden im Formular nicht angezeigt"
-                defaultChecked={faq.isActive}
-                onChange={(e) => {
-                  const hidden = e.target.closest('form')?.querySelector('input[name="isActive"]') as HTMLInputElement;
-                  if (hidden) hidden.value = String(e.target.checked);
-                }}
+                checked={isActive}
+                onChange={(e) => setIsActive(e.target.checked)}
               />
             </div>
           )}

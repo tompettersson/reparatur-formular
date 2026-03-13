@@ -21,6 +21,7 @@ export function ManufacturerForm({ manufacturer, onClose }: ManufacturerFormProp
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [isActive, setIsActive] = useState(manufacturer?.isActive ?? true);
 
   const handleSubmit = (formData: FormData) => {
     setError(null);
@@ -64,15 +65,12 @@ export function ManufacturerForm({ manufacturer, onClose }: ManufacturerFormProp
 
           {manufacturer && (
             <div className="pt-2">
-              <input type="hidden" name="isActive" value={String(manufacturer.isActive)} />
+              <input type="hidden" name="isActive" value={String(isActive)} />
               <Checkbox
                 label="Aktiv"
                 description="Deaktivierte Hersteller werden im Formular nicht angezeigt"
-                defaultChecked={manufacturer.isActive}
-                onChange={(e) => {
-                  const hidden = e.target.closest('form')?.querySelector('input[name="isActive"]') as HTMLInputElement;
-                  if (hidden) hidden.value = String(e.target.checked);
-                }}
+                checked={isActive}
+                onChange={(e) => setIsActive(e.target.checked)}
               />
             </div>
           )}

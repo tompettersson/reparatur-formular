@@ -25,6 +25,7 @@ export function CountryForm({ country, onClose }: CountryFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [testZip, setTestZip] = useState('');
   const [zipPattern, setZipPattern] = useState(country?.zipPattern || '');
+  const [isActive, setIsActive] = useState(country?.isActive ?? true);
 
   const testRegex = () => {
     if (!testZip || !zipPattern) return null;
@@ -123,15 +124,12 @@ export function CountryForm({ country, onClose }: CountryFormProps) {
 
           {country && (
             <div className="pt-2">
-              <input type="hidden" name="isActive" value={String(country.isActive)} />
+              <input type="hidden" name="isActive" value={String(isActive)} />
               <Checkbox
                 label="Aktiv"
                 description="Deaktivierte Länder werden im Formular nicht angezeigt"
-                defaultChecked={country.isActive}
-                onChange={(e) => {
-                  const hidden = e.target.closest('form')?.querySelector('input[name="isActive"]') as HTMLInputElement;
-                  if (hidden) hidden.value = String(e.target.checked);
-                }}
+                checked={isActive}
+                onChange={(e) => setIsActive(e.target.checked)}
               />
             </div>
           )}

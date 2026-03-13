@@ -25,8 +25,10 @@ export function SoleTypeForm({ soleType, onClose }: SoleTypeFormProps) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [deactivateWarning, setDeactivateWarning] = useState<string | null>(null);
+  const [isActive, setIsActive] = useState(soleType?.isActive ?? true);
 
   const handleActiveChange = async (checked: boolean) => {
+    setIsActive(checked);
     if (!checked && soleType) {
       const count = await checkSoleTypeUsage(soleType.key);
       if (count > 0) {
@@ -111,14 +113,12 @@ export function SoleTypeForm({ soleType, onClose }: SoleTypeFormProps) {
 
           {soleType && (
             <div className="pt-2">
-              <input type="hidden" name="isActive" value={String(soleType.isActive)} />
+              <input type="hidden" name="isActive" value={String(isActive)} />
               <Checkbox
                 label="Aktiv"
                 description="Deaktivierte Gummisorten werden im Formular nicht angezeigt"
-                defaultChecked={soleType.isActive}
+                checked={isActive}
                 onChange={(e) => {
-                  const hidden = e.target.closest('form')?.querySelector('input[name="isActive"]') as HTMLInputElement;
-                  if (hidden) hidden.value = String(e.target.checked);
                   handleActiveChange(e.target.checked);
                 }}
               />
