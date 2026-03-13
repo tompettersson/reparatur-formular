@@ -34,8 +34,9 @@ export function TrustBadges() {
             src="/logos/vibram-resoler.png"
             alt="Vibram Climbing Authorized Cobbler"
             width={80}
-            height={92}
+            height={118}
             className="object-contain mb-3"
+            unoptimized
           />
           <p className="text-xs font-semibold text-[#38362d]">
             Vibram Authorized Cobbler
@@ -53,6 +54,7 @@ export function TrustBadges() {
             width={80}
             height={80}
             className="object-contain mb-3"
+            unoptimized
           />
           <p className="text-xs font-semibold text-[#38362d]">
             La Sportiva Authorized Resoler
@@ -68,8 +70,9 @@ export function TrustBadges() {
             src="/logos/scarpa-resoler.png"
             alt="Scarpa Official Resoler"
             width={72}
-            height={92}
+            height={106}
             className="object-contain mb-3"
+            unoptimized
           />
           <p className="text-xs font-semibold text-[#38362d]">
             Scarpa Official Resoler
