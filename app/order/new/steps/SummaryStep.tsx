@@ -3,16 +3,27 @@
 import { UseFormWatch } from 'react-hook-form';
 import { Card } from '@/components/ui/Card';
 import { OrderFormData } from '@/lib/validation';
-import { calculateItemPriceFromMap, formatPrice, SHIPPING_COSTS } from '@/lib/pricing';
-import type { SoleTypeConfig } from '@/lib/config';
+import { calculateItemPriceFromMap, formatPrice } from '@/lib/pricing';
+import type { SoleTypeConfig, AdditionalPricesConfig, ShippingCostsConfig } from '@/lib/config';
 
 interface SummaryStepProps {
   watch: UseFormWatch<OrderFormData>;
   soleTypes?: SoleTypeConfig[];
+  additionalPrices?: AdditionalPricesConfig;
+  shippingCosts?: ShippingCostsConfig;
 }
 
-export function SummaryStep({ watch, soleTypes }: SummaryStepProps) {
+// Default fallbacks
+const DEFAULT_SHIPPING: ShippingCostsConfig = {
+  germany: { label: 7, return: 7 },
+  eu: { label: 15, return: 11 },
+  nonEu: { label: 15, return: 15 },
+  freeReturnMinPairs: 3,
+};
+
+export function SummaryStep({ watch, soleTypes, additionalPrices, shippingCosts }: SummaryStepProps) {
   const formData = watch();
+  const shipping = shippingCosts || DEFAULT_SHIPPING;
 
   // Build sole price map and label map from props
   const solePriceMap: Record<string, number> = {};
@@ -32,7 +43,7 @@ export function SummaryStep({ watch, soleTypes }: SummaryStepProps) {
       closure: item.closure || false,
       disinfection: item.disinfection || false,
       trustProfessionals: item.trustProfessionals || false,
-    }, solePriceMap);
+    }, solePriceMap, additionalPrices);
   }, 0) || 0;
 
   const edgeRubberLabels = {
@@ -110,7 +121,7 @@ export function SummaryStep({ watch, soleTypes }: SummaryStepProps) {
                   closure: item.closure || false,
                   disinfection: item.disinfection || false,
                   trustProfessionals: item.trustProfessionals || false,
-                }, solePriceMap) : 0;
+                }, solePriceMap, additionalPrices) : 0;
 
                 return (
                   <tr key={index} className="border-b border-gray-100">
@@ -163,22 +174,22 @@ export function SummaryStep({ watch, soleTypes }: SummaryStepProps) {
         <div className="grid grid-cols-3 gap-4 text-center">
           <div>
             <p className="font-semibold text-[#38362d]">Deutschland</p>
-            <p className="text-gray-600 text-sm">Versandlabel: {SHIPPING_COSTS.germany.label}€</p>
-            <p className="text-gray-600 text-sm">Rückversand: {SHIPPING_COSTS.germany.return}€</p>
+            <p className="text-gray-600 text-sm">Versandlabel: {shipping.germany.label.toFixed(2).replace('.', ',')}€</p>
+            <p className="text-gray-600 text-sm">Rückversand: {shipping.germany.return.toFixed(2).replace('.', ',')}€</p>
           </div>
           <div>
             <p className="font-semibold text-[#38362d]">EU</p>
-            <p className="text-gray-600 text-sm">Versandlabel: {SHIPPING_COSTS.eu.label}€</p>
-            <p className="text-gray-600 text-sm">Rückversand: {SHIPPING_COSTS.eu.return}€</p>
+            <p className="text-gray-600 text-sm">Versandlabel: {shipping.eu.label.toFixed(2).replace('.', ',')}€</p>
+            <p className="text-gray-600 text-sm">Rückversand: {shipping.eu.return.toFixed(2).replace('.', ',')}€</p>
           </div>
           <div>
-            <p className="font-semibold text-[#38362d]">Nicht-EU</p>
-            <p className="text-gray-600 text-sm">Versandlabel: {SHIPPING_COSTS.nonEu.label}€</p>
-            <p className="text-gray-600 text-sm">Rückversand: {SHIPPING_COSTS.nonEu.return}€</p>
+            <p className="font-semibold text-[#38362d]">Nicht-EU / CH</p>
+            <p className="text-gray-600 text-sm">Versandlabel: {shipping.nonEu.label.toFixed(2).replace('.', ',')}€</p>
+            <p className="text-gray-600 text-sm">Rückversand: {shipping.nonEu.return.toFixed(2).replace('.', ',')}€</p>
           </div>
         </div>
         <p className="text-xs text-gray-500 mt-4 text-center">
-          Die Versandkosten sind nicht im Kostenvoranschlag enthalten.
+          Ab {shipping.freeReturnMinPairs} Paar versandkostenfreier Rückversand innerhalb Deutschlands. Versandkosten sind nicht im KVA enthalten.
         </p>
       </Card>
 

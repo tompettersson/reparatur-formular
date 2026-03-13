@@ -12,13 +12,12 @@ import { ShoesFormData, OrderItemFormData } from '@/lib/validation';
 import {
   SHOE_SIZES,
   QUANTITY_OPTIONS,
-  ADDITIONAL_PRICES,
   calculateItemPriceFromMap,
   formatPrice,
 } from '@/lib/pricing';
 import { TOOLTIPS } from '@/lib/tooltips';
 import { ProductSuggestions } from '@/components/ProductSuggestions';
-import type { ManufacturerConfig, SoleTypeConfig, FaqEntryConfig } from '@/lib/config';
+import type { ManufacturerConfig, SoleTypeConfig, FaqEntryConfig, AdditionalPricesConfig } from '@/lib/config';
 
 // Helper component to render tooltip content with simple formatting
 function TooltipContent({ title, content }: { title: string; content: string }) {
@@ -113,9 +112,10 @@ interface ShoesStepProps {
   manufacturers?: ManufacturerConfig[];
   soleTypes?: SoleTypeConfig[];
   faqs?: FaqEntryConfig[];
+  additionalPrices?: AdditionalPricesConfig;
 }
 
-export function ShoesStep({ register, errors, watch, control, manufacturers, soleTypes, faqs }: ShoesStepProps) {
+export function ShoesStep({ register, errors, watch, control, manufacturers, soleTypes, faqs, additionalPrices }: ShoesStepProps) {
   const { fields, append, remove } = useFieldArray({
     control,
     name: 'items',
@@ -149,7 +149,7 @@ export function ShoesStep({ register, errors, watch, control, manufacturers, sol
   }));
 
   const edgeRubberOptions = [
-    { value: 'YES', label: `Ja (+${ADDITIONAL_PRICES.edgeRubber}€)` },
+    { value: 'YES', label: `Ja (+${additionalPrices?.edgeRubber ?? 19}€)` },
     { value: 'NO', label: 'Nein' },
     { value: 'DISCRETION', label: 'Nach Ermessen' },
   ];
@@ -164,7 +164,7 @@ export function ShoesStep({ register, errors, watch, control, manufacturers, sol
       closure: item.closure || false,
       disinfection: item.disinfection || false,
       trustProfessionals: false,
-    }, solePriceMap);
+    }, solePriceMap, additionalPrices);
   };
 
   // Gesamtpreis
@@ -364,7 +364,7 @@ export function ShoesStep({ register, errors, watch, control, manufacturers, sol
                 {/* Verschluss - mit Paarpreis-Hinweis */}
                 <div className="flex items-center gap-2">
                   <Checkbox
-                    label={`Verschluss reparieren (+${ADDITIONAL_PRICES.closure}€ Paarpreis)`}
+                    label={`Verschluss reparieren (+${additionalPrices?.closure ?? 20}€ Paarpreis)`}
                     {...register(`items.${index}.closure` as const)}
                   />
                   <Tooltip
@@ -378,7 +378,7 @@ export function ShoesStep({ register, errors, watch, control, manufacturers, sol
                 {/* Desinfektion - NEU als eigene Option */}
                 <div className="flex items-center gap-2">
                   <Checkbox
-                    label={`Desinfektion (+${ADDITIONAL_PRICES.disinfection}€ pro Paar)`}
+                    label={`Desinfektion (+${additionalPrices?.disinfection ?? 3}€ pro Paar)`}
                     description="Antibakterielle Behandlung gegen Gerüche und Bakterien"
                     {...register(`items.${index}.disinfection` as const)}
                   />

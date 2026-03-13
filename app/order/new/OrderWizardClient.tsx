@@ -12,7 +12,7 @@ import { ShoesStep } from './steps/ShoesStep';
 import { SummaryStep } from './steps/SummaryStep';
 import { orderSchema, OrderFormData } from '@/lib/validation';
 import { createOrder } from './actions';
-import type { CountryConfig, ManufacturerConfig, SoleTypeConfig, FaqEntryConfig } from '@/lib/config';
+import type { CountryConfig, ManufacturerConfig, SoleTypeConfig, FaqEntryConfig, AdditionalPricesConfig, ShippingCostsConfig } from '@/lib/config';
 
 // Hammer/tool icon for repair service
 const ToolIcon = () => (
@@ -35,9 +35,11 @@ export interface OrderWizardProps {
   manufacturers: ManufacturerConfig[];
   soleTypes: SoleTypeConfig[];
   faqs: FaqEntryConfig[];
+  additionalPrices: AdditionalPricesConfig;
+  shippingCosts: ShippingCostsConfig;
 }
 
-export function OrderWizardClient({ countries, manufacturers, soleTypes, faqs }: OrderWizardProps) {
+export function OrderWizardClient({ countries, manufacturers, soleTypes, faqs, additionalPrices, shippingCosts }: OrderWizardProps) {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -228,6 +230,7 @@ export function OrderWizardClient({ countries, manufacturers, soleTypes, faqs }:
                 manufacturers={manufacturers}
                 soleTypes={soleTypes}
                 faqs={faqs}
+                additionalPrices={additionalPrices}
               />
             )}
 
@@ -235,6 +238,8 @@ export function OrderWizardClient({ countries, manufacturers, soleTypes, faqs }:
               <SummaryStep
                 watch={watch}
                 soleTypes={soleTypes}
+                additionalPrices={additionalPrices}
+                shippingCosts={shippingCosts}
               />
             )}
           </div>

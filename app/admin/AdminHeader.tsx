@@ -56,6 +56,9 @@ export function AdminHeader() {
             <Link href="/admin/faq" className="text-sm text-gray-600 hover:text-[#ef6a27] transition-colors">
               FAQ
             </Link>
+            <Link href="/admin/settings" className="text-sm text-gray-600 hover:text-[#ef6a27] transition-colors">
+              Preise
+            </Link>
             <Button variant="outline" size="sm" onClick={handleLogout}>
               Abmelden
             </Button>

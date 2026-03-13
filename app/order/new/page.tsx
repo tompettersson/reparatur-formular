@@ -1,13 +1,15 @@
-import { getCountries, getManufacturers, getSoleTypes, getFaqEntries } from '@/lib/config';
+import { getCountries, getManufacturers, getSoleTypes, getFaqEntries, getAdditionalPrices, getShippingCosts } from '@/lib/config';
 import { OrderWizardClient } from './OrderWizardClient';
 
 export default async function OrderWizardPage() {
   // Fetch config from DB (with hardcoded fallback)
-  const [countries, manufacturers, soleTypes, faqs] = await Promise.all([
+  const [countries, manufacturers, soleTypes, faqs, additionalPrices, shippingCosts] = await Promise.all([
     getCountries(),
     getManufacturers(),
     getSoleTypes(),
     getFaqEntries(),
+    getAdditionalPrices(),
+    getShippingCosts(),
   ]);
 
   return (
@@ -16,6 +18,8 @@ export default async function OrderWizardPage() {
       manufacturers={manufacturers}
       soleTypes={soleTypes}
       faqs={faqs}
+      additionalPrices={additionalPrices}
+      shippingCosts={shippingCosts}
     />
   );
 }

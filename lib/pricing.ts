@@ -112,8 +112,10 @@ export function calculateItemPrice(item: OrderItemInput): number {
 // Preisberechnung mit dynamischer Preismap (für DB-Preise)
 export function calculateItemPriceFromMap(
   item: OrderItemInput,
-  solePriceMap: Record<string, number>
+  solePriceMap: Record<string, number>,
+  additionalPrices?: { edgeRubber: number; closure: number; disinfection: number }
 ): number {
+  const prices = additionalPrices || ADDITIONAL_PRICES;
   let price = 0;
 
   if (item.sole) {
@@ -124,15 +126,15 @@ export function calculateItemPriceFromMap(
   }
 
   if (item.edgeRubber === 'YES') {
-    price += ADDITIONAL_PRICES.edgeRubber;
+    price += prices.edgeRubber;
   }
 
   if (item.closure) {
-    price += ADDITIONAL_PRICES.closure;
+    price += prices.closure;
   }
 
   if (item.disinfection) {
-    price += ADDITIONAL_PRICES.disinfection;
+    price += prices.disinfection;
   }
 
   return price * item.quantity;

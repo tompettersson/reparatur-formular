@@ -18,7 +18,7 @@ import {
   type EdgeRubberOption,
 } from '@/lib/pricing';
 import type { Order, OrderItem, EdgeRubber } from '@/app/generated/prisma/client';
-import type { CountryConfig, ManufacturerConfig, SoleTypeConfig } from '@/lib/config';
+import type { CountryConfig, ManufacturerConfig, SoleTypeConfig, AdditionalPricesConfig } from '@/lib/config';
 
 const SALUTATIONS = [
   { value: 'Herr', label: 'Herr' },
@@ -26,7 +26,7 @@ const SALUTATIONS = [
   { value: 'Divers', label: 'Divers' },
 ];
 
-const EDGE_RUBBER_OPTIONS = [
+const DEFAULT_EDGE_RUBBER_OPTIONS = [
   { value: 'YES', label: `Ja (+${ADDITIONAL_PRICES.edgeRubber}€)` },
   { value: 'NO', label: 'Nein' },
   { value: 'DISCRETION', label: 'Nach Ermessen' },
@@ -79,12 +79,20 @@ interface OrderEditFormProps {
   countries?: CountryConfig[];
   manufacturers?: ManufacturerConfig[];
   soleTypes?: SoleTypeConfig[];
+  additionalPrices?: AdditionalPricesConfig;
 }
 
-export function OrderEditForm({ order, countries, manufacturers, soleTypes }: OrderEditFormProps) {
+export function OrderEditForm({ order, countries, manufacturers, soleTypes, additionalPrices }: OrderEditFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+
+  const prices = additionalPrices || ADDITIONAL_PRICES;
+  const EDGE_RUBBER_OPTIONS = [
+    { value: 'YES', label: `Ja (+${prices.edgeRubber}€)` },
+    { value: 'NO', label: 'Nein' },
+    { value: 'DISCRETION', label: 'Nach Ermessen' },
+  ];
 
   const { register, control, watch, handleSubmit, formState: { errors } } = useForm<FormData>({
     defaultValues: {
@@ -390,13 +398,13 @@ export function OrderEditForm({ order, countries, manufacturers, soleTypes }: Or
                 />
                 <div className="flex items-end pb-2">
                   <Checkbox
-                    label={`Verschluss (+${ADDITIONAL_PRICES.closure}€ Paarpreis)`}
+                    label={`Verschluss (+${prices.closure}€ Paarpreis)`}
                     {...register(`items.${index}.closure`)}
                   />
                 </div>
                 <div className="flex items-end pb-2">
                   <Checkbox
-                    label={`Desinfektion (+${ADDITIONAL_PRICES.disinfection}€)`}
+                    label={`Desinfektion (+${prices.disinfection}€)`}
                     {...register(`items.${index}.disinfection`)}
                   />
                 </div>

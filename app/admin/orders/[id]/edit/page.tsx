@@ -3,7 +3,7 @@ import { notFound, redirect } from 'next/navigation';
 import Link from 'next/link';
 import { AdminHeader } from '../../../AdminHeader';
 import { OrderEditForm } from './OrderEditForm';
-import { getCountries, getManufacturers, getSoleTypes } from '@/lib/config';
+import { getCountries, getManufacturers, getSoleTypes, getAdditionalPrices } from '@/lib/config';
 
 interface EditOrderPageProps {
   params: Promise<{ id: string }>;
@@ -27,10 +27,11 @@ export default async function EditOrderPage({ params }: EditOrderPageProps) {
   }
 
   // Fetch config data for form dropdowns
-  const [countries, manufacturers, soleTypes] = await Promise.all([
+  const [countries, manufacturers, soleTypes, additionalPrices] = await Promise.all([
     getCountries(),
     getManufacturers(),
     getSoleTypes(),
+    getAdditionalPrices(),
   ]);
 
   return (
@@ -62,6 +63,7 @@ export default async function EditOrderPage({ params }: EditOrderPageProps) {
           countries={countries}
           manufacturers={manufacturers}
           soleTypes={soleTypes}
+          additionalPrices={additionalPrices}
         />
       </main>
     </div>

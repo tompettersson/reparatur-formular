@@ -249,6 +249,19 @@ model SoleType {
   @@index([isActive, sortOrder])
 }
 
+model PriceSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique       // e.g. "edgeRubber", "closure", "shipping_de_label"
+  label     String                 // Display name: "Randgummi"
+  value     Decimal  @db.Decimal(10, 2)
+  category  String                 // "additional" or "shipping"
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([category, sortOrder])
+}
+
 model FaqEntry {
   id        String   @id @default(cuid())
   question  String
