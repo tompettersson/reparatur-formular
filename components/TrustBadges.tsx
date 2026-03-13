@@ -30,14 +30,16 @@ export function TrustBadges() {
       <div className="grid grid-cols-3 gap-4">
         {/* Vibram Badge */}
         <div className="flex flex-col items-center text-center p-4 bg-[#fafaf9] rounded-lg border border-[#e7e5e4]">
-          <Image
-            src="/logos/vibram-resoler.png"
-            alt="Vibram Climbing Authorized Cobbler"
-            width={80}
-            height={118}
-            className="object-contain mb-3"
-            unoptimized
-          />
+          <div className="h-28 flex items-center justify-center mb-3">
+            <Image
+              src="/logos/vibram-resoler.png"
+              alt="Vibram Climbing Authorized Cobbler"
+              width={120}
+              height={176}
+              className="object-contain max-h-28"
+              unoptimized
+            />
+          </div>
           <p className="text-xs font-semibold text-[#38362d]">
             Vibram Authorized Cobbler
           </p>
@@ -48,14 +50,16 @@ export function TrustBadges() {
 
         {/* La Sportiva Badge */}
         <div className="flex flex-col items-center text-center p-4 bg-[#fafaf9] rounded-lg border border-[#e7e5e4]">
-          <Image
-            src="/logos/la-sportiva-resoler.png"
-            alt="La Sportiva Authorized Resoler"
-            width={80}
-            height={80}
-            className="object-contain mb-3"
-            unoptimized
-          />
+          <div className="h-28 flex items-center justify-center mb-3">
+            <Image
+              src="/logos/la-sportiva-resoler.png"
+              alt="La Sportiva Authorized Resoler"
+              width={120}
+              height={120}
+              className="object-contain max-h-28"
+              unoptimized
+            />
+          </div>
           <p className="text-xs font-semibold text-[#38362d]">
             La Sportiva Authorized Resoler
           </p>
@@ -66,14 +70,16 @@ export function TrustBadges() {
 
         {/* Scarpa Badge */}
         <div className="flex flex-col items-center text-center p-4 bg-[#fafaf9] rounded-lg border border-[#e7e5e4]">
-          <Image
-            src="/logos/scarpa-resoler.png"
-            alt="Scarpa Official Resoler"
-            width={72}
-            height={106}
-            className="object-contain mb-3"
-            unoptimized
-          />
+          <div className="h-28 flex items-center justify-center mb-3">
+            <Image
+              src="/logos/scarpa-resoler.png"
+              alt="Scarpa Official Resoler"
+              width={110}
+              height={162}
+              className="object-contain max-h-28"
+              unoptimized
+            />
+          </div>
           <p className="text-xs font-semibold text-[#38362d]">
             Scarpa Official Resoler
           </p>
