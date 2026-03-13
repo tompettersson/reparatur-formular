@@ -112,8 +112,8 @@ export const customerSchema = z.object({
 
 // Schuh/Position Schema (Step 2)
 export const orderItemSchema = z.object({
-  // NEU: 0.5 = Einzelschuh, 1 = Paar
-  quantity: z.number().min(0.5).max(10).multipleOf(0.5),
+  // 0.5 = Einzelschuh, 1 = Paar
+  quantity: z.number().min(0.5).max(1).multipleOf(0.5),
   manufacturer: z.string().min(1, 'Bitte wählen Sie einen Hersteller'),
   model: z.string().min(1, 'Bitte geben Sie das Modell ein'),
   color: z.string().optional(),
@@ -124,23 +124,11 @@ export const orderItemSchema = z.object({
   closure: z.boolean().default(false),
   // NEU: Desinfektion als eigene Option
   disinfection: z.boolean().default(false),
-  // NEU: "Profis machen lassen" - macht Bauteil+Randgummi optional
+  // Feld bleibt im Schema für DB-Kompatibilität, wird aber nicht mehr im UI angezeigt
   trustProfessionals: z.boolean().default(false),
   additionalWork: z.string().optional(),
   internalNotes: z.string().optional(),
-}).refine(
-  (data) => {
-    // Wenn "Profis machen lassen" nicht aktiv, müssen sole und edgeRubber ausgefüllt sein
-    if (!data.trustProfessionals) {
-      return data.sole && data.edgeRubber;
-    }
-    return true;
-  },
-  {
-    message: 'Bitte wählen Sie Sohle und Randgummi oder aktivieren Sie "Profis machen lassen"',
-    path: ['sole'],
-  }
-);
+});
 
 export const shoesSchema = z.object({
   items: z.array(orderItemSchema).min(1, 'Bitte fügen Sie mindestens einen Schuh hinzu'),

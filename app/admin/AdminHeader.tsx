@@ -40,9 +40,21 @@ export function AdminHeader() {
             </Link>
           </div>
 
-          <nav className="flex items-center gap-4">
-            <Link href="/admin/orders" className="text-gray-600 hover:text-[#ef6a27]">
+          <nav className="flex items-center gap-2 sm:gap-4 flex-wrap">
+            <Link href="/admin/orders" className="text-sm text-gray-600 hover:text-[#ef6a27] transition-colors">
               Aufträge
+            </Link>
+            <Link href="/admin/countries" className="text-sm text-gray-600 hover:text-[#ef6a27] transition-colors">
+              Länder
+            </Link>
+            <Link href="/admin/manufacturers" className="text-sm text-gray-600 hover:text-[#ef6a27] transition-colors">
+              Hersteller
+            </Link>
+            <Link href="/admin/sole-types" className="text-sm text-gray-600 hover:text-[#ef6a27] transition-colors">
+              Gummisorten
+            </Link>
+            <Link href="/admin/faq" className="text-sm text-gray-600 hover:text-[#ef6a27] transition-colors">
+              FAQ
             </Link>
             <Button variant="outline" size="sm" onClick={handleLogout}>
               Abmelden

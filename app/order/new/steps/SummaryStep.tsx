@@ -3,26 +3,36 @@
 import { UseFormWatch } from 'react-hook-form';
 import { Card } from '@/components/ui/Card';
 import { OrderFormData } from '@/lib/validation';
-import { SOLE_PRICES, calculateItemPrice, formatPrice, SoleType, SHIPPING_COSTS } from '@/lib/pricing';
+import { calculateItemPriceFromMap, formatPrice, SHIPPING_COSTS } from '@/lib/pricing';
+import type { SoleTypeConfig } from '@/lib/config';
 
 interface SummaryStepProps {
   watch: UseFormWatch<OrderFormData>;
+  soleTypes?: SoleTypeConfig[];
 }
 
-export function SummaryStep({ watch }: SummaryStepProps) {
+export function SummaryStep({ watch, soleTypes }: SummaryStepProps) {
   const formData = watch();
+
+  // Build sole price map and label map from props
+  const solePriceMap: Record<string, number> = {};
+  const soleLabelMap: Record<string, string> = {};
+  (soleTypes || []).forEach(st => {
+    solePriceMap[st.key] = st.price;
+    soleLabelMap[st.key] = st.label;
+  });
 
   // Gesamtpreis berechnen
   const totalPrice = formData.items?.reduce((sum, item) => {
     if (!item.sole) return sum;
-    return sum + calculateItemPrice({
+    return sum + calculateItemPriceFromMap({
       quantity: Number(item.quantity) || 1,
-      sole: item.sole as SoleType,
+      sole: item.sole,
       edgeRubber: item.edgeRubber || 'NO',
       closure: item.closure || false,
       disinfection: item.disinfection || false,
       trustProfessionals: item.trustProfessionals || false,
-    });
+    }, solePriceMap);
   }, 0) || 0;
 
   const edgeRubberLabels = {
@@ -92,15 +102,15 @@ export function SummaryStep({ watch }: SummaryStepProps) {
             </thead>
             <tbody>
               {formData.items?.map((item, index) => {
-                const soleInfo = SOLE_PRICES[item.sole as SoleType];
-                const itemPrice = item.sole ? calculateItemPrice({
+                const soleLabel = soleLabelMap[item.sole] || item.sole;
+                const itemPrice = item.sole ? calculateItemPriceFromMap({
                   quantity: Number(item.quantity) || 1,
-                  sole: item.sole as SoleType,
+                  sole: item.sole,
                   edgeRubber: item.edgeRubber || 'NO',
                   closure: item.closure || false,
                   disinfection: item.disinfection || false,
                   trustProfessionals: item.trustProfessionals || false,
-                }) : 0;
+                }, solePriceMap) : 0;
 
                 return (
                   <tr key={index} className="border-b border-gray-100">
@@ -111,7 +121,7 @@ export function SummaryStep({ watch }: SummaryStepProps) {
                       {item.color && <span className="text-gray-400"> ({item.color})</span>}
                     </td>
                     <td className="py-3 text-gray-600">{item.size}</td>
-                    <td className="py-3 text-gray-600">{soleInfo?.label || item.sole}</td>
+                    <td className="py-3 text-gray-600">{soleLabel}</td>
                     <td className="py-3 text-gray-600">{edgeRubberLabels[item.edgeRubber as keyof typeof edgeRubberLabels]}</td>
                     <td className="py-3 text-gray-600">{item.closure ? 'Ja' : 'Nein'}</td>
                     <td className="py-3 text-right font-semibold text-[#ef6a27]">{formatPrice(itemPrice)}</td>

@@ -3,6 +3,7 @@ import { notFound, redirect } from 'next/navigation';
 import Link from 'next/link';
 import { AdminHeader } from '../../../AdminHeader';
 import { OrderEditForm } from './OrderEditForm';
+import { getCountries, getManufacturers, getSoleTypes } from '@/lib/config';
 
 interface EditOrderPageProps {
   params: Promise<{ id: string }>;
@@ -24,6 +25,13 @@ export default async function EditOrderPage({ params }: EditOrderPageProps) {
   if (['COMPLETED', 'CANCELLED'].includes(order.status)) {
     redirect(`/admin/orders/${id}`);
   }
+
+  // Fetch config data for form dropdowns
+  const [countries, manufacturers, soleTypes] = await Promise.all([
+    getCountries(),
+    getManufacturers(),
+    getSoleTypes(),
+  ]);
 
   return (
     <div className="min-h-screen bg-[#f3f3f3]">
@@ -49,7 +57,12 @@ export default async function EditOrderPage({ params }: EditOrderPageProps) {
           <p className="text-gray-500">Änderungen werden im Protokoll erfasst</p>
         </div>
 
-        <OrderEditForm order={order} />
+        <OrderEditForm
+          order={order}
+          countries={countries}
+          manufacturers={manufacturers}
+          soleTypes={soleTypes}
+        />
       </main>
     </div>
   );

@@ -2,7 +2,8 @@
 
 import { prisma } from '@/lib/prisma';
 import { orderSchema, OrderFormData } from '@/lib/validation';
-import { calculateItemPrice } from '@/lib/pricing';
+import { calculateItemPriceFromMap } from '@/lib/pricing';
+import { getSolePriceMap } from '@/lib/config';
 import { revalidatePath } from 'next/cache';
 import { searchProducts } from '@/lib/shopware';
 import type { ProductSuggestion } from '@/lib/shopware';
@@ -24,6 +25,9 @@ export async function createOrder(formData: OrderFormData): Promise<ActionResult
   try {
     // Validierung
     const validatedData = orderSchema.parse(formData);
+
+    // Fetch sole prices from DB
+    const solePriceMap = await getSolePriceMap();
 
     // Auftrag mit Positionen erstellen
     const order = await prisma.order.create({
@@ -79,14 +83,14 @@ export async function createOrder(formData: OrderFormData): Promise<ActionResult
             trustProfessionals: item.trustProfessionals,
             additionalWork: item.additionalWork,
             internalNotes: item.internalNotes,
-            calculatedPrice: calculateItemPrice({
+            calculatedPrice: calculateItemPriceFromMap({
               quantity: item.quantity,
-              sole: item.sole as any,
+              sole: item.sole,
               edgeRubber: item.edgeRubber,
               closure: item.closure,
               disinfection: item.disinfection,
               trustProfessionals: item.trustProfessionals,
-            }),
+            }, solePriceMap),
           })),
         },
       },

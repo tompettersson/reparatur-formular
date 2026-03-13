@@ -1,8 +1,11 @@
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
+import { Suspense } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { AdminHeader } from '../AdminHeader';
+import { OrderSearch } from './OrderSearch';
+import { CopyButton } from './CopyButton';
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   DRAFT: { label: 'Entwurf', color: 'bg-gray-100 text-gray-700' },
@@ -17,8 +20,32 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   ON_HOLD: { label: 'Rückfrage', color: 'bg-orange-100 text-orange-700' },
 };
 
-export default async function AdminOrdersPage() {
+interface AdminOrdersPageProps {
+  searchParams: Promise<{ q?: string }>;
+}
+
+export default async function AdminOrdersPage({ searchParams }: AdminOrdersPageProps) {
+  const { q } = await searchParams;
+
+  // Build where clause based on search query
+  const whereClause = q
+    ? {
+        OR: [
+          // Search by order number (exact or partial)
+          ...(isNaN(Number(q))
+            ? []
+            : [{ orderNumber: { equals: Number(q) } }]),
+          // Search by customer name
+          { firstName: { contains: q, mode: 'insensitive' as const } },
+          { lastName: { contains: q, mode: 'insensitive' as const } },
+          // Search by email
+          { email: { contains: q, mode: 'insensitive' as const } },
+        ],
+      }
+    : {};
+
   const orders = await prisma.order.findMany({
+    where: whereClause,
     include: {
       items: true,
     },
@@ -27,8 +54,13 @@ export default async function AdminOrdersPage() {
     },
   });
 
-  const totalOrders = orders.length;
-  const submittedOrders = orders.filter((o) => o.status === 'SUBMITTED').length;
+  // Stats (always show total, not filtered)
+  const totalOrders = q
+    ? await prisma.order.count()
+    : orders.length;
+  const submittedOrders = q
+    ? await prisma.order.count({ where: { status: 'SUBMITTED' } })
+    : orders.filter((o) => o.status === 'SUBMITTED').length;
   const totalRevenue = orders.reduce(
     (sum, order) => sum + (order.totalPrice ? Number(order.totalPrice) : 0),
     0
@@ -66,11 +98,23 @@ export default async function AdminOrdersPage() {
           </Card>
         </div>
 
-        {/* Orders Table */}
+        {/* Search */}
         <Card title="Aufträge">
+          <div className="mb-6">
+            <Suspense fallback={<div className="h-11 bg-gray-100 rounded-lg animate-pulse" />}>
+              <OrderSearch />
+            </Suspense>
+          </div>
+
+          {q && (
+            <div className="mb-4 text-sm text-gray-500">
+              {orders.length} {orders.length === 1 ? 'Ergebnis' : 'Ergebnisse'} für &quot;{q}&quot;
+            </div>
+          )}
+
           {orders.length === 0 ? (
             <p className="text-center text-gray-500 py-8">
-              Noch keine Aufträge vorhanden.
+              {q ? 'Keine Aufträge gefunden.' : 'Noch keine Aufträge vorhanden.'}
             </p>
           ) : (
             <div className="overflow-x-auto">
@@ -90,9 +134,12 @@ export default async function AdminOrdersPage() {
                   {orders.map((order) => (
                     <tr key={order.id} className="border-b border-gray-100 hover:bg-gray-50">
                       <td className="py-3 px-4">
-                        <span className="font-mono font-bold text-[#ef6a27]">
-                          #{order.orderNumber}
-                        </span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-mono font-bold text-[#ef6a27]">
+                            #{order.orderNumber}
+                          </span>
+                          <CopyButton text={String(order.orderNumber)} />
+                        </div>
                       </td>
                       <td className="py-3 px-4">
                         <div>

@@ -10,34 +10,21 @@ import { Checkbox } from '@/components/ui/Checkbox';
 import { Button } from '@/components/ui/Button';
 import { updateOrder } from '../../actions';
 import {
-  SOLE_PRICES,
-  MANUFACTURERS,
   SHOE_SIZES,
   QUANTITY_OPTIONS,
   ADDITIONAL_PRICES,
-  calculateItemPrice,
+  calculateItemPriceFromMap,
   formatPrice,
-  type SoleType,
   type EdgeRubberOption,
 } from '@/lib/pricing';
-import { SUPPORTED_COUNTRIES } from '@/lib/validation';
 import type { Order, OrderItem, EdgeRubber } from '@/app/generated/prisma/client';
+import type { CountryConfig, ManufacturerConfig, SoleTypeConfig } from '@/lib/config';
 
 const SALUTATIONS = [
   { value: 'Herr', label: 'Herr' },
   { value: 'Frau', label: 'Frau' },
   { value: 'Divers', label: 'Divers' },
 ];
-
-const COUNTRY_OPTIONS = SUPPORTED_COUNTRIES.map(c => ({
-  value: c.code,
-  label: c.label,
-}));
-
-const SOLE_OPTIONS = Object.entries(SOLE_PRICES).map(([value, info]) => ({
-  value,
-  label: `${info.label} (${info.thickness}) – ${info.price}€`,
-}));
 
 const EDGE_RUBBER_OPTIONS = [
   { value: 'YES', label: `Ja (+${ADDITIONAL_PRICES.edgeRubber}€)` },
@@ -89,9 +76,12 @@ interface FormData {
 
 interface OrderEditFormProps {
   order: Order & { items: OrderItem[] };
+  countries?: CountryConfig[];
+  manufacturers?: ManufacturerConfig[];
+  soleTypes?: SoleTypeConfig[];
 }
 
-export function OrderEditForm({ order }: OrderEditFormProps) {
+export function OrderEditForm({ order, countries, manufacturers, soleTypes }: OrderEditFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -148,16 +138,35 @@ export function OrderEditForm({ order }: OrderEditFormProps) {
   const watchedItems = watch('items');
   const deliverySame = watch('customer.deliverySame');
 
+  // Build options from config props
+  const COUNTRY_OPTIONS = (countries || []).map(c => ({
+    value: c.code,
+    label: c.label,
+  }));
+
+  const MANUFACTURER_OPTIONS = (manufacturers || []).map(m => ({
+    value: m.name,
+    label: m.name,
+  }));
+
+  const solePriceMap: Record<string, number> = {};
+  (soleTypes || []).forEach(st => { solePriceMap[st.key] = st.price; });
+
+  const SOLE_OPTIONS = (soleTypes || []).map(st => ({
+    value: st.key,
+    label: `${st.label} (${st.thickness}) – ${st.price}€`,
+  }));
+
   // Calculate prices
   const itemPrices = watchedItems.map((item) =>
-    calculateItemPrice({
+    calculateItemPriceFromMap({
       quantity: item.quantity,
-      sole: item.sole as SoleType,
+      sole: item.sole,
       edgeRubber: item.edgeRubber as EdgeRubberOption,
       closure: item.closure,
       disinfection: item.disinfection,
       trustProfessionals: item.trustProfessionals,
-    })
+    }, solePriceMap)
   );
 
   const totalPrice = itemPrices.reduce((sum, price) => sum + price, 0);
@@ -353,7 +362,7 @@ export function OrderEditForm({ order }: OrderEditFormProps) {
                 />
                 <Select
                   label="Hersteller"
-                  options={MANUFACTURERS.map((m) => ({ value: m, label: m }))}
+                  options={MANUFACTURER_OPTIONS}
                   {...register(`items.${index}.manufacturer`)}
                 />
                 <Input

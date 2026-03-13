@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import { PrintButton } from './PrintButton';
+import { getSoleLabelMap } from '@/lib/config';
 import './print.css';
 
 // Versandadresse kletterschuhe.de (KORRIGIERT: Hadamar statt Efringen-Kirchen)
@@ -9,17 +10,6 @@ const SHOP_ADDRESS = {
   street: 'Franz-Gensler-Str. 7-9',
   zip: '65589',
   city: 'Hadamar',
-};
-
-// Sohlen-Namen für Anzeige
-const SOLE_NAMES: Record<string, string> = {
-  vibram_xs_grip: 'Vibram XS Grip (4mm)',
-  vibram_xs_grip_2: 'Vibram XS Grip 2 (4mm)',
-  vibram_xs_edge: 'Vibram XS Edge (4mm)',
-  stealth_c4: 'Stealth C4 (4mm)',
-  stealth_hf: 'Stealth HF (4mm)',
-  boreal: 'Boreal (4mm)',
-  original: 'Original Sohle',
 };
 
 // Randgummi-Optionen
@@ -35,6 +25,8 @@ interface PrintPageProps {
 
 export default async function PrintPage({ params }: PrintPageProps) {
   const { id } = await params;
+
+  const SOLE_NAMES = await getSoleLabelMap();
 
   const order = await prisma.order.findUnique({
     where: { id },

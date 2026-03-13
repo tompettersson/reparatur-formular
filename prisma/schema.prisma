@@ -206,3 +206,57 @@ model OrderStatusChange {
 
   @@index([orderId])
 }
+
+// ============================================
+// Configuration / Master Data Models
+// ============================================
+
+model Country {
+  id         String   @id @default(cuid())
+  code       String   @unique       // "DE", "AT", etc.
+  label      String                 // "Deutschland"
+  zipPattern String                 // Regex als String: "^\\d{5}$"
+  isActive   Boolean  @default(true)
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([isActive, sortOrder])
+}
+
+model Manufacturer {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive, sortOrder])
+}
+
+model SoleType {
+  id        String   @id @default(cuid())
+  key       String   @unique       // "vibram_xs_grip" (stored in OrderItem.sole)
+  label     String                 // "Vibram XS Grip"
+  price     Decimal  @db.Decimal(10, 2)
+  thickness String                 // "4mm"
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive, sortOrder])
+}
+
+model FaqEntry {
+  id        String   @id @default(cuid())
+  question  String
+  answer    String   @db.Text      // HTML content
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive, sortOrder])
+}

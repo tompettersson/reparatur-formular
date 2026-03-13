@@ -6,15 +6,17 @@ import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Checkbox } from '@/components/ui/Checkbox';
 import { Card } from '@/components/ui/Card';
-import { CustomerFormData, SUPPORTED_COUNTRIES } from '@/lib/validation';
+import { CustomerFormData } from '@/lib/validation';
 import { findCustomerByEmail, CustomerData } from '../actions';
 import { TrustBadges } from '@/components/TrustBadges';
+import type { CountryConfig } from '@/lib/config';
 
 interface CustomerStepProps {
   register: UseFormRegister<CustomerFormData>;
   errors: FieldErrors<CustomerFormData>;
   watch: UseFormWatch<CustomerFormData>;
   setValue: UseFormSetValue<CustomerFormData>;
+  countries?: CountryConfig[];
 }
 
 // Debounce hook
@@ -94,7 +96,7 @@ const ExternalLinkIcon = () => (
   </svg>
 );
 
-export function CustomerStep({ register, errors, watch, setValue }: CustomerStepProps) {
+export function CustomerStep({ register, errors, watch, setValue, countries }: CustomerStepProps) {
   const deliverySame = watch('deliverySame');
   const email = watch('email');
   const packstationNumber = watch('packstationNumber');
@@ -169,7 +171,7 @@ export function CustomerStep({ register, errors, watch, setValue }: CustomerStep
     { value: 'Divers', label: 'Divers' },
   ];
 
-  const countryOptions = SUPPORTED_COUNTRIES.map(c => ({
+  const countryOptions = (countries || []).map(c => ({
     value: c.code,
     label: c.label,
   }));
@@ -316,12 +318,13 @@ export function CustomerStep({ register, errors, watch, setValue }: CustomerStep
         </div>
       )}
 
-      {/* Lieferadresse Toggle */}
+      {/* Lieferadresse Toggle - Opt-in für abweichende Adresse */}
       <Card variant="default">
         <Checkbox
-          label="Lieferadresse entspricht der Rechnungsadresse"
-          description="Die reparierten Schuhe werden an Ihre Rechnungsadresse zurückgeschickt"
-          {...register('deliverySame')}
+          label="Andere Lieferanschrift angeben"
+          description="Die reparierten Schuhe sollen an eine andere Adresse geschickt werden"
+          checked={!deliverySame}
+          onChange={(e) => setValue('deliverySame', !e.target.checked)}
         />
       </Card>
 
@@ -466,6 +469,15 @@ export function CustomerStep({ register, errors, watch, setValue }: CustomerStep
               <>
                 Ich habe die{' '}
                 <a
+                  href="https://www.kletterschuhe.de/agb"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#3ca1ac] hover:underline"
+                >
+                  AGB
+                </a>{' '}
+                und{' '}
+                <a
                   href="https://www.kletterschuhe.de/datenschutz"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -476,28 +488,13 @@ export function CustomerStep({ register, errors, watch, setValue }: CustomerStep
                 gelesen und akzeptiere diese.
               </>
             }
-            error={errors.gdprAccepted?.message}
+            error={errors.gdprAccepted?.message || errors.agbAccepted?.message}
             required
-            {...register('gdprAccepted')}
-          />
-          <Checkbox
-            label={
-              <>
-                Ich habe die{' '}
-                <a
-                  href="https://www.kletterschuhe.de/agb"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[#3ca1ac] hover:underline"
-                >
-                  AGB
-                </a>{' '}
-                gelesen und akzeptiere diese.
-              </>
-            }
-            error={errors.agbAccepted?.message}
-            required
-            {...register('agbAccepted')}
+            checked={watch('gdprAccepted')}
+            onChange={(e) => {
+              setValue('gdprAccepted', e.target.checked);
+              setValue('agbAccepted', e.target.checked);
+            }}
           />
           <div className="pt-2 border-t border-[#f5f5f4] mt-3">
             <Checkbox

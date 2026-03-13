@@ -1,72 +1,9 @@
 'use client';
 
+import Image from 'next/image';
+
 // Trust-Badges für autorisierte Reparaturdienste
-// Zeigt echte Partner-Zertifikate von La Sportiva und Scarpa
-
-// La Sportiva Authorized Resoler Badge - rundes Design mit Berg-Logo
-function LaSportivaBadge() {
-  return (
-    <svg viewBox="0 0 80 80" className="w-12 h-12 flex-shrink-0">
-      {/* Äußerer Ring */}
-      <circle cx="40" cy="40" r="38" fill="none" stroke="#1a1a1a" strokeWidth="2" />
-      <circle cx="40" cy="40" r="35" fill="none" stroke="#1a1a1a" strokeWidth="1" />
-
-      {/* Berg-Symbol oben */}
-      <path d="M40 12 L50 28 L30 28 Z" fill="#1a1a1a" />
-      <text x="40" y="24" textAnchor="middle" fontSize="4" fill="white" fontWeight="bold">▲</text>
-
-      {/* LA SPORTIVA Text */}
-      <text x="40" y="38" textAnchor="middle" fontSize="6" fill="#1a1a1a" fontWeight="bold" fontFamily="Arial, sans-serif">
-        LA SPORTIVA
-      </text>
-
-      {/* Trennlinie */}
-      <line x1="15" y1="44" x2="65" y2="44" stroke="#1a1a1a" strokeWidth="0.5" />
-
-      {/* AUTHORIZED RESOLER Text */}
-      <text x="40" y="52" textAnchor="middle" fontSize="5" fill="#1a1a1a" fontFamily="Arial, sans-serif">
-        AUTHORIZED
-      </text>
-      <text x="40" y="60" textAnchor="middle" fontSize="5" fill="#1a1a1a" fontFamily="Arial, sans-serif">
-        RESOLER
-      </text>
-    </svg>
-  );
-}
-
-// Scarpa Official Resoler Badge - rechteckiges türkises Design
-function ScarpaBadge() {
-  return (
-    <svg viewBox="0 0 70 80" className="w-11 h-12 flex-shrink-0">
-      {/* Hintergrund */}
-      <rect x="2" y="2" width="66" height="76" rx="4" fill="#00a5b5" />
-
-      {/* Weißer Rahmen */}
-      <rect x="5" y="5" width="60" height="70" rx="2" fill="none" stroke="white" strokeWidth="1" />
-
-      {/* S Symbol */}
-      <text x="35" y="35" textAnchor="middle" fontSize="24" fill="white" fontWeight="bold" fontFamily="Arial, sans-serif">
-        S
-      </text>
-
-      {/* SCARPA Text */}
-      <text x="35" y="50" textAnchor="middle" fontSize="8" fill="white" fontWeight="bold" fontFamily="Arial, sans-serif">
-        SCARPA
-      </text>
-
-      {/* Trennlinie */}
-      <line x1="12" y1="55" x2="58" y2="55" stroke="white" strokeWidth="0.5" />
-
-      {/* OFFICIAL RESOLER Text */}
-      <text x="35" y="64" textAnchor="middle" fontSize="5" fill="white" fontFamily="Arial, sans-serif">
-        OFFICIAL
-      </text>
-      <text x="35" y="72" textAnchor="middle" fontSize="5" fill="white" fontFamily="Arial, sans-serif">
-        RESOLER
-      </text>
-    </svg>
-  );
-}
+// Zeigt echte Partner-Zertifikate von Vibram, La Sportiva und Scarpa
 
 export function TrustBadges() {
   return (
@@ -90,23 +27,54 @@ export function TrustBadges() {
         </span>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {/* Vibram Badge */}
+        <div className="flex items-center gap-3 p-3 bg-[#fafaf9] rounded-lg border border-[#e7e5e4]">
+          <Image
+            src="/logos/vibram-resoler.png"
+            alt="Vibram Climbing Authorized Cobbler"
+            width={48}
+            height={56}
+            className="flex-shrink-0 object-contain"
+          />
+          <div className="min-w-0">
+            <p className="text-xs font-semibold text-[#38362d]">
+              Vibram Authorized Cobbler
+            </p>
+            <p className="text-xs text-[#78716c]">
+              Climbing-Spezialist
+            </p>
+          </div>
+        </div>
+
         {/* La Sportiva Badge */}
         <div className="flex items-center gap-3 p-3 bg-[#fafaf9] rounded-lg border border-[#e7e5e4]">
-          <LaSportivaBadge />
+          <Image
+            src="/logos/la-sportiva-resoler.png"
+            alt="La Sportiva Authorized Resoler"
+            width={48}
+            height={48}
+            className="flex-shrink-0 object-contain"
+          />
           <div className="min-w-0">
             <p className="text-xs font-semibold text-[#38362d]">
               La Sportiva Authorized Resoler
             </p>
             <p className="text-xs text-[#78716c]">
-              Autorisierter Reparaturpartner
+              Autorisierter Partner
             </p>
           </div>
         </div>
 
         {/* Scarpa Badge */}
         <div className="flex items-center gap-3 p-3 bg-[#fafaf9] rounded-lg border border-[#e7e5e4]">
-          <ScarpaBadge />
+          <Image
+            src="/logos/scarpa-resoler.png"
+            alt="Scarpa Official Resoler"
+            width={40}
+            height={56}
+            className="flex-shrink-0 object-contain"
+          />
           <div className="min-w-0">
             <p className="text-xs font-semibold text-[#38362d]">
               Scarpa Official Resoler

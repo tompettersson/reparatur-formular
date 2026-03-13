@@ -63,18 +63,10 @@ export const SHOE_SIZES = Array.from({ length: 53 }, (_, i) => {
   return size % 1 === 0 ? size.toString() : size.toFixed(1);
 });
 
-// Anzahl-Optionen (0.5 = Einzelschuh, 1 = Paar, etc.)
+// Anzahl-Optionen (0.5 = Einzelschuh, 1 = Paar)
 export const QUANTITY_OPTIONS = [
   { value: '0.5', label: '0,5 (Einzelschuh)' },
   { value: '1', label: '1 (Paar)' },
-  { value: '1.5', label: '1,5' },
-  { value: '2', label: '2 (Paare)' },
-  { value: '2.5', label: '2,5' },
-  { value: '3', label: '3 (Paare)' },
-  { value: '3.5', label: '3,5' },
-  { value: '4', label: '4 (Paare)' },
-  { value: '4.5', label: '4,5' },
-  { value: '5', label: '5 (Paare)' },
 ];
 
 // Preisberechnung für eine Position
@@ -114,6 +106,35 @@ export function calculateItemPrice(item: OrderItemInput): number {
   }
 
   // Multipliziert mit Anzahl (0.5 = halber Preis für Einzelschuh)
+  return price * item.quantity;
+}
+
+// Preisberechnung mit dynamischer Preismap (für DB-Preise)
+export function calculateItemPriceFromMap(
+  item: OrderItemInput,
+  solePriceMap: Record<string, number>
+): number {
+  let price = 0;
+
+  if (item.sole) {
+    const solePrice = solePriceMap[item.sole];
+    if (solePrice !== undefined) {
+      price += solePrice;
+    }
+  }
+
+  if (item.edgeRubber === 'YES') {
+    price += ADDITIONAL_PRICES.edgeRubber;
+  }
+
+  if (item.closure) {
+    price += ADDITIONAL_PRICES.closure;
+  }
+
+  if (item.disinfection) {
+    price += ADDITIONAL_PRICES.disinfection;
+  }
+
   return price * item.quantity;
 }
 

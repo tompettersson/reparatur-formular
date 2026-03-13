@@ -10,17 +10,15 @@ import { Button } from '@/components/ui/Button';
 import { Tooltip } from '@/components/ui/Tooltip';
 import { ShoesFormData, OrderItemFormData } from '@/lib/validation';
 import {
-  SOLE_PRICES,
-  MANUFACTURERS,
   SHOE_SIZES,
   QUANTITY_OPTIONS,
   ADDITIONAL_PRICES,
-  calculateItemPrice,
+  calculateItemPriceFromMap,
   formatPrice,
-  SoleType,
 } from '@/lib/pricing';
 import { TOOLTIPS } from '@/lib/tooltips';
 import { ProductSuggestions } from '@/components/ProductSuggestions';
+import type { ManufacturerConfig, SoleTypeConfig, FaqEntryConfig } from '@/lib/config';
 
 // Helper component to render tooltip content with simple formatting
 function TooltipContent({ title, content }: { title: string; content: string }) {
@@ -57,27 +55,10 @@ function TooltipContent({ title, content }: { title: string; content: string }) 
 }
 
 // FAQ Accordion Component
-function FAQAccordion() {
+function FAQAccordion({ faqs }: { faqs: FaqEntryConfig[] }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
-  const faqs = [
-    {
-      question: 'Alle wichtigen Infos zum Versand',
-      answer: `Schicken Sie Ihre Schuhe gut verpackt an unsere Adresse. Nach Eingang prüfen wir den Zustand und melden uns bei Fragen. Die Reparatur dauert ca. 2-3 Wochen. Der Rückversand erfolgt per DHL.`,
-    },
-    {
-      question: 'Was auswählen wenn ich keine Ahnung habe?',
-      answer: `Kein Problem! Aktivieren Sie einfach "Ihr seid die Profis" und wir wählen die beste Option für Ihren Schuh. Wir kontaktieren Sie vor der Reparatur, falls Rückfragen entstehen.`,
-    },
-    {
-      question: 'Welches Gummi für Hallenkletterer?',
-      answer: `Für die Halle empfehlen wir Vibram XS Grip 2 - sehr gute Reibung auf Kunstgriffen. Für Boulder mit viel Volumen ist Stealth C4 eine tolle Alternative mit mehr Dämpfung.`,
-    },
-    {
-      question: 'Lohnt sich Randgummi?',
-      answer: `Randgummi lohnt sich, wenn der originale Rand bereits verschlissen ist oder Sie Ihre Schuhe stark belasten (Risskletterei, Überhänge). Bei leichtem Hallenklettern oft nicht nötig.`,
-    },
-  ];
+  if (!faqs || faqs.length === 0) return null;
 
   return (
     <Card
@@ -87,7 +68,7 @@ function FAQAccordion() {
     >
       <div className="divide-y divide-[#e7e5e4]">
         {faqs.map((faq, index) => (
-          <div key={index} className="py-3">
+          <div key={faq.id} className="py-3">
             <button
               type="button"
               onClick={() => setOpenIndex(openIndex === index ? null : index)}
@@ -129,9 +110,12 @@ interface ShoesStepProps {
   errors: FieldErrors<ShoesFormData>;
   watch: UseFormWatch<ShoesFormData>;
   control: Control<ShoesFormData>;
+  manufacturers?: ManufacturerConfig[];
+  soleTypes?: SoleTypeConfig[];
+  faqs?: FaqEntryConfig[];
 }
 
-export function ShoesStep({ register, errors, watch, control }: ShoesStepProps) {
+export function ShoesStep({ register, errors, watch, control, manufacturers, soleTypes, faqs }: ShoesStepProps) {
   const { fields, append, remove } = useFieldArray({
     control,
     name: 'items',
@@ -145,9 +129,9 @@ export function ShoesStep({ register, errors, watch, control }: ShoesStepProps) 
     label: opt.label,
   }));
 
-  const manufacturerOptions = MANUFACTURERS.map((m) => ({
-    value: m,
-    label: m,
+  const manufacturerOptions = (manufacturers || []).map((m) => ({
+    value: m.name,
+    label: m.name,
   }));
 
   const sizeOptions = SHOE_SIZES.map((s) => ({
@@ -155,9 +139,13 @@ export function ShoesStep({ register, errors, watch, control }: ShoesStepProps) 
     label: s,
   }));
 
-  const soleOptions = Object.entries(SOLE_PRICES).map(([key, info]) => ({
-    value: key,
-    label: `${info.label} (${info.thickness}) - ${formatPrice(info.price)}`,
+  // Build sole price map for price calculations
+  const solePriceMap: Record<string, number> = {};
+  (soleTypes || []).forEach(st => { solePriceMap[st.key] = st.price; });
+
+  const soleOptions = (soleTypes || []).map((st) => ({
+    value: st.key,
+    label: `${st.label} (${st.thickness}) - ${formatPrice(st.price)}`,
   }));
 
   const edgeRubberOptions = [
@@ -168,15 +156,15 @@ export function ShoesStep({ register, errors, watch, control }: ShoesStepProps) 
 
   // Preis für einzelne Position berechnen
   const calculatePositionPrice = (item: OrderItemFormData): number => {
-    if (!item.sole && !item.trustProfessionals) return 0;
-    return calculateItemPrice({
+    if (!item.sole) return 0;
+    return calculateItemPriceFromMap({
       quantity: Number(item.quantity) || 1,
-      sole: item.sole as SoleType,
+      sole: item.sole,
       edgeRubber: item.edgeRubber || 'NO',
       closure: item.closure || false,
       disinfection: item.disinfection || false,
-      trustProfessionals: item.trustProfessionals || false,
-    });
+      trustProfessionals: false,
+    }, solePriceMap);
   };
 
   // Gesamtpreis
@@ -202,10 +190,26 @@ export function ShoesStep({ register, errors, watch, control }: ShoesStepProps) 
 
   return (
     <div className="space-y-6">
+      {/* Reparatur-Video */}
+      <Card
+        title="So funktioniert die Reparatur"
+        subtitle="Kurzes Video ansehen"
+        variant="default"
+      >
+        <div className="relative aspect-video rounded-[12px] overflow-hidden">
+          <iframe
+            src="https://www.youtube-nocookie.com/embed/PwaIotj5Tqo?rel=0&modestbranding=1"
+            title="Optimale Kletterschuh Reparatur: Originalbauteile vs. Halbsohle"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            className="absolute inset-0 w-full h-full"
+          />
+        </div>
+      </Card>
+
       {/* Schuh-Positionen */}
       {fields.map((field, index) => {
         const itemPrice = items?.[index] ? calculatePositionPrice(items[index]) : 0;
-        const trustProfessionals = items?.[index]?.trustProfessionals;
 
         return (
           <Card key={field.id} className="relative">
@@ -306,63 +310,52 @@ export function ShoesStep({ register, errors, watch, control }: ShoesStepProps) 
               <div className="hidden md:block" />
             </div>
 
-            {/* "Profis machen lassen" Checkbox - NEU */}
-            <div className="mt-6 p-4 bg-[#f0fdf4] rounded-lg border border-[#22c55e]/20">
-              <Checkbox
-                label="Ihr seid die Profis - macht was für den Schuh am sinnvollsten ist!"
-                description="Wir wählen die beste Kombination aus Gummi und Randgummi für Ihren Schuh. Wir kontaktieren Sie vor der Reparatur."
-                {...register(`items.${index}.trustProfessionals` as const)}
-              />
-            </div>
-
-            {/* Reparatur-Optionen (nur wenn nicht "Profis machen lassen") */}
-            {!trustProfessionals && (
-              <div className="mt-6 pt-6 border-t border-[#e7e5e4]">
-                <h5 className="text-sm font-semibold text-[#38362d] mb-4">Reparatur-Optionen</h5>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Sohle/Bauteil */}
-                  <div>
-                    <div className="flex items-center gap-1.5 mb-2">
-                      <label className="text-sm font-semibold text-[#38362d]" style={{ fontFamily: 'var(--font-display)' }}>
-                        Gummi / Bauteil<span className="text-[#ef6a27] ml-0.5">*</span>
-                      </label>
-                      <Tooltip
-                        content={<TooltipContent title={TOOLTIPS.sole.title} content={TOOLTIPS.sole.content} />}
-                        position="top"
-                        trigger="click"
-                        maxWidth={320}
-                      />
-                    </div>
-                    <Select
-                      options={soleOptions}
-                      placeholder="Bitte wählen..."
-                      error={errors.items?.[index]?.sole?.message}
-                      {...register(`items.${index}.sole` as const)}
+            {/* Reparatur-Optionen */}
+            <div className="mt-6 pt-6 border-t border-[#e7e5e4]">
+              <h5 className="text-sm font-semibold text-[#38362d] mb-4">Reparatur-Optionen</h5>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Sohle/Bauteil */}
+                <div>
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <label className="text-sm font-semibold text-[#38362d]" style={{ fontFamily: 'var(--font-display)' }}>
+                      Gummi / Bauteil<span className="text-[#ef6a27] ml-0.5">*</span>
+                    </label>
+                    <Tooltip
+                      content={<TooltipContent title={TOOLTIPS.sole.title} content={TOOLTIPS.sole.content} />}
+                      position="top"
+                      trigger="click"
+                      maxWidth={320}
                     />
                   </div>
+                  <Select
+                    options={soleOptions}
+                    placeholder="Bitte wählen..."
+                    error={errors.items?.[index]?.sole?.message}
+                    {...register(`items.${index}.sole` as const)}
+                  />
+                </div>
 
-                  {/* Randgummi */}
-                  <div>
-                    <div className="flex items-center gap-1.5 mb-2">
-                      <label className="text-sm font-semibold text-[#38362d]" style={{ fontFamily: 'var(--font-display)' }}>
-                        Randgummi<span className="text-[#ef6a27] ml-0.5">*</span>
-                      </label>
-                      <Tooltip
-                        content={<TooltipContent title={TOOLTIPS.edgeRubber.title} content={TOOLTIPS.edgeRubber.content} />}
-                        position="top"
-                        trigger="click"
-                        maxWidth={300}
-                      />
-                    </div>
-                    <Select
-                      options={edgeRubberOptions}
-                      error={errors.items?.[index]?.edgeRubber?.message}
-                      {...register(`items.${index}.edgeRubber` as const)}
+                {/* Randgummi */}
+                <div>
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <label className="text-sm font-semibold text-[#38362d]" style={{ fontFamily: 'var(--font-display)' }}>
+                      Randgummi<span className="text-[#ef6a27] ml-0.5">*</span>
+                    </label>
+                    <Tooltip
+                      content={<TooltipContent title={TOOLTIPS.edgeRubber.title} content={TOOLTIPS.edgeRubber.content} />}
+                      position="top"
+                      trigger="click"
+                      maxWidth={300}
                     />
                   </div>
+                  <Select
+                    options={edgeRubberOptions}
+                    error={errors.items?.[index]?.edgeRubber?.message}
+                    {...register(`items.${index}.edgeRubber` as const)}
+                  />
                 </div>
               </div>
-            )}
+            </div>
 
             {/* Zusatzoptionen */}
             <div className="mt-6 pt-6 border-t border-[#e7e5e4]">
@@ -448,7 +441,7 @@ export function ShoesStep({ register, errors, watch, control }: ShoesStepProps) 
       </Card>
 
       {/* FAQ Accordion */}
-      <FAQAccordion />
+      <FAQAccordion faqs={faqs || []} />
     </div>
   );
 }

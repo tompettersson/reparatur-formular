@@ -6,16 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { AdminHeader } from '../../AdminHeader';
 import { StatusChangeForm, STATUS_CONFIG } from './StatusChangeForm';
 import { OrderStatus } from '@/app/generated/prisma/client';
-
-const SOLE_NAMES: Record<string, string> = {
-  vibram_xs_grip: 'Vibram XS Grip (4mm)',
-  vibram_xs_grip_2: 'Vibram XS Grip 2 (4mm)',
-  vibram_xs_edge: 'Vibram XS Edge (4mm)',
-  stealth_c4: 'Stealth C4 (4mm)',
-  stealth_hf: 'Stealth HF (4mm)',
-  boreal: 'Boreal (4mm)',
-  original: 'Original Sohle',
-};
+import { getSoleLabelMap } from '@/lib/config';
 
 const EDGE_RUBBER_LABELS: Record<string, string> = {
   YES: 'Ja',
@@ -29,6 +20,8 @@ interface OrderDetailPageProps {
 
 export default async function OrderDetailPage({ params }: OrderDetailPageProps) {
   const { id } = await params;
+
+  const SOLE_NAMES = await getSoleLabelMap();
 
   const order = await prisma.order.findUnique({
     where: { id },
