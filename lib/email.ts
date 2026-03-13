@@ -1,20 +1,28 @@
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 
-// Initialize Resend client lazily (only when actually sending)
-let resendClient: Resend | null = null;
+// Initialize SMTP transporter lazily
+let transporter: nodemailer.Transporter | null = null;
 
-function getResendClient(): Resend | null {
-  if (!process.env.RESEND_API_KEY) {
+function getTransporter(): nodemailer.Transporter | null {
+  if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
     return null;
   }
-  if (!resendClient) {
-    resendClient = new Resend(process.env.RESEND_API_KEY);
+  if (!transporter) {
+    transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_PORT) || 587,
+      secure: false, // STARTTLS
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    });
   }
-  return resendClient;
+  return transporter;
 }
 
 // Default sender
-const FROM_EMAIL = process.env.FROM_EMAIL || 'noreply@kletterschuhe.de';
+const FROM_EMAIL = process.env.SMTP_FROM || 'info@kletterschuhe.de';
 const FROM_NAME = 'kletterschuhe.de Reparatur-Service';
 
 export interface SendEmailOptions {
@@ -25,32 +33,27 @@ export interface SendEmailOptions {
 }
 
 export async function sendEmail({ to, subject, html, text }: SendEmailOptions) {
-  const resend = getResendClient();
+  const smtp = getTransporter();
 
-  // Skip if no API key configured (development mode)
-  if (!resend) {
-    console.log('[Email] Skipping email (no API key configured)');
+  // Skip if no SMTP configured (development mode)
+  if (!smtp) {
+    console.log('[Email] Skipping email (no SMTP configured)');
     console.log(`[Email] Would send to: ${to}`);
     console.log(`[Email] Subject: ${subject}`);
     return { success: true, messageId: 'dev-mode' };
   }
 
   try {
-    const { data, error } = await resend.emails.send({
+    const info = await smtp.sendMail({
       from: `${FROM_NAME} <${FROM_EMAIL}>`,
-      to: [to],
+      to,
       subject,
       html,
       text: text || stripHtml(html),
     });
 
-    if (error) {
-      console.error('[Email] Error sending email:', error);
-      return { success: false, error: error.message };
-    }
-
-    console.log(`[Email] Sent successfully to ${to}, ID: ${data?.id}`);
-    return { success: true, messageId: data?.id };
+    console.log(`[Email] Sent successfully to ${to}, ID: ${info.messageId}`);
+    return { success: true, messageId: info.messageId };
   } catch (error) {
     console.error('[Email] Exception sending email:', error);
     return { success: false, error: 'Failed to send email' };
